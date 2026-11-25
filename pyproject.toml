@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cfveg"
+version = "0.1.0"
+description = "Counterfactual vegetation forecasting under drought with physics-constrained diffusion"
+requires-python = ">=3.11"
+dependencies = [
+  "torch", "numpy", "scipy", "pandas", "xarray", "netCDF4", "rasterio",
+  "pystac-client", "planetary-computer", "odc-stac", "scikit-learn",
+  "matplotlib", "pyyaml", "requests", "tqdm", "tensorboard", "dask", "pytest",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: longer tests"]
+addopts = "-q"

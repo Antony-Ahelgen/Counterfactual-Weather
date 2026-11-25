@@ -1,0 +1,6 @@
+# One consumer GPU (~8 h total training).
+window: {context: 10, horizon: 10, stride: 2, patch: 64}
+model: {base_ch: 64, ch_mult: [1, 2, 2, 4], emb_dim: 256}
+diffusion: {timesteps: 1000, ddim_steps: 50}
+train: {batch_size: 32, steps: 60000}
+eval: {n_members: 32, n_eval_windows: 1000, seeds: [0, 1, 2]}

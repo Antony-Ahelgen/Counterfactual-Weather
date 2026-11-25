@@ -1,0 +1,6 @@
+# CPU tests only. NEVER report smoke results as findings.
+window: {context: 4, horizon: 4, stride: 4, patch: 32}
+model: {base_ch: 8, ch_mult: [1, 2], emb_dim: 32}
+diffusion: {timesteps: 100, ddim_steps: 5}
+train: {batch_size: 4, steps: 30, log_every: 10, ckpt_every: 20, val_every: 1000, threads: 4}
+eval: {n_members: 4, n_eval_windows: 8}

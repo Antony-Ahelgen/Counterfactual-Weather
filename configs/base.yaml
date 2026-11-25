@@ -1,0 +1,81 @@
+# Base configuration. Presets in configs/presets/*.yaml override top-level sections.
+data:
+  root: data
+  raw_dir: data/raw
+  processed_dir: data/processed
+  # Study area: Central/Western Europe (2018, 2019, 2020, 2022 drought years affected parts of it)
+  region_bbox: [-2.0, 44.0, 24.0, 54.5]     # lon_min, lat_min, lon_max, lat_max
+  n_candidate_locations: 260                  # candidates; filtered by land cover to n_locations
+  n_locations: 160
+  min_spacing_deg: 0.3                        # spatial buffer between locations (> 2 ERA5-Land cells)
+  location_seed: 20240601
+  years: [2017, 2018, 2019, 2020, 2021, 2022, 2023]
+  doy_start: 61                               # ~Mar 1 (first 5-day bin start)
+  n_bins: 49                                  # 49 x 5 days -> ~Oct 30
+  bin_days: 5
+  patch_px: 64                                # downloaded patch side (pixels)
+  resolution_m: 20
+  crs: EPSG:3035
+  max_scene_cloud: 80                         # eo:cloud_cover prefilter (%)
+  valid_scl: [4, 5, 6]                        # vegetation, bare, water
+  min_veg_fraction: 0.6                       # WorldCover classes 10,20,30,40 share in patch
+  weather_years: [2010, 2023]                 # inclusive range downloaded for climatology
+  weather_model: era5_seamless
+splits:
+  train_years: [2017, 2018, 2019, 2023]
+  val_years: [2020]
+  test_years: [2021, 2022]
+  frac_val_locations: 0.15
+  frac_test_locations: 0.15
+  split_seed: 7
+  # weather climatology years (inputs only): all downloaded years except val/test years
+drought:
+  stress_window_days: 30
+  threshold: 1.0          # stress index s >= threshold => stressed day-bin
+  min_stressed_days: 30   # within the horizon
+  weights: {precip_deficit: 1.0, temp: 0.5, vpd: 0.5, soil_moisture: 1.0}
+window:
+  context: 10
+  horizon: 10
+  stride: 2
+  patch: 64
+  min_context_valid: 0.3     # fraction of valid pixels across context frames
+  min_target_valid: 0.2
+model:
+  base_ch: 32
+  ch_mult: [1, 2, 2]
+  emb_dim: 128
+  dropout: 0.0
+diffusion:
+  timesteps: 1000
+  schedule: cosine
+  prediction: v
+  ddim_steps: 25
+  ema_decay: 0.999
+train:
+  batch_size: 16
+  lr: 2.0e-4
+  steps: 20000
+  grad_clip: 1.0
+  log_every: 100
+  ckpt_every: 1000
+  val_every: 2000
+  num_workers: 0
+  threads: 14
+physics:
+  rate_percentile: 99.5
+  phen_k: 2.0
+  mono_eps: 0.01
+  lambda_rate: 1.0
+  lambda_phen: 0.5
+  lambda_mono: 1.0
+  guidance_scale: 1.0
+  lambda_range: 1.0
+  use_loss: true
+  use_guidance: true
+  use_projection: true
+  constraints: [rate, phen, mono]
+eval:
+  n_members: 20
+  n_eval_windows: 400
+  seeds: [0]
