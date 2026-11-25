@@ -14,5 +14,6 @@ wandb/
 *.log
 .pytest_cache/
 *.egg-info/
-.claude/settings.local.json
 results/**/*.npz
+
+results/smoke/

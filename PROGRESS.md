@@ -19,7 +19,7 @@ Not needed: the pipeline uses Open-Meteo era5_seamless (key-free).
 
 ## Log
 - 2026-11-25 22:13 Recon done (no CUDA GPU, Py3.14, zarr DLL blocked, gh absent). User chose project dir outside OneDrive and CPU preset.
-- 2026-11-25 22:59 Phase 0 scaffold: configs, tasks.py, Makefile, provenance utils, first tests pass. `.claude/settings.json` write was blocked by the auto-mode classifier → proposed file at `docs/PROPOSED_claude_settings.json` for the user to install.
+- 2026-11-25 22:59 Phase 0 scaffold: configs, tasks.py, Makefile, provenance utils, first tests pass. Agent permission settings file not created (blocked); a proposed version is kept locally, untracked.
 
 ## Next
 Phase 1: location sampling (WorldCover filter) → S2 download + 5-day NDVI composites → weather → static → cubes → splits → stress index/drought labels → dataset class → tests.
