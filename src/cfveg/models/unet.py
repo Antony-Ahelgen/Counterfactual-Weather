@@ -45,7 +45,7 @@ class ResBlock(nn.Module):
 class CondUNet(nn.Module):
     def __init__(self, K: int, H: int, n_wx: int, n_static: int = 6, base_ch: int = 32,
                  ch_mult: tuple = (1, 2, 2), emb_dim: int = 128, dropout: float = 0.0,
-                 diffusion: bool = True):
+                 diffusion: bool = True, n_res: int = 2):
         super().__init__()
         self.K, self.H, self.diffusion = K, H, diffusion
         cin = (H if diffusion else 0) + 2 * K + n_static
@@ -60,15 +60,16 @@ class CondUNet(nn.Module):
         c = base_ch
         skips = []
         for i, co in enumerate(chs):
-            self.down.append(nn.ModuleList([ResBlock(c, co, emb_dim, dropout), ResBlock(co, co, emb_dim, dropout)]))
+            self.down.append(nn.ModuleList([ResBlock(c, co, emb_dim, dropout)] +
+                                           [ResBlock(co, co, emb_dim, dropout) for _ in range(n_res - 1)]))
             skips.append(co)
             c = co
             self.pool.append(nn.Conv2d(c, c, 3, stride=2, padding=1) if i < len(chs) - 1 else nn.Identity())
         self.mid = nn.ModuleList([ResBlock(c, c, emb_dim, dropout), ResBlock(c, c, emb_dim, dropout)])
         self.up = nn.ModuleList()
         for i, co in reversed(list(enumerate(chs))):
-            self.up.append(nn.ModuleList([ResBlock(c + skips[i], co, emb_dim, dropout),
-                                          ResBlock(co, co, emb_dim, dropout)]))
+            self.up.append(nn.ModuleList([ResBlock(c + skips[i], co, emb_dim, dropout)] +
+                                         [ResBlock(co, co, emb_dim, dropout) for _ in range(n_res - 1)]))
             c = co
         self.out = nn.Sequential(nn.GroupNorm(min(8, c), c), nn.SiLU(), nn.Conv2d(c, H, 3, padding=1))
         nn.init.zeros_(self.out[-1].weight)
@@ -108,4 +109,4 @@ class CondUNet(nn.Module):
 def build_unet(cfg: dict, diffusion: bool = True, n_wx: int = 11) -> CondUNet:
     w, m = cfg["window"], cfg["model"]
     return CondUNet(w["context"], w["horizon"], n_wx, 6, m["base_ch"], tuple(m["ch_mult"]), m["emb_dim"],
-                    m.get("dropout", 0.0), diffusion)
+                    m.get("dropout", 0.0), diffusion, m.get("n_res", 2))

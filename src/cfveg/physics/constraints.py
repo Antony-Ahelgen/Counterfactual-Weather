@@ -24,6 +24,7 @@ def fit_physics(cube, cfg: dict) -> dict:
     """Rate bounds and phenology envelopes from train locations x train years only."""
     m = cube.loc_year_mask("train", cfg)
     pct = cfg["physics"]["rate_percentile"]
+    min_fv = cfg["physics"].get("rate_min_frame_valid", 0.95)
     thr = cfg["drought"]["threshold"]
     bd = cube.meta["bin_days"]
     nb = cube.ndvi.shape[2]
@@ -39,6 +40,9 @@ def fit_physics(cube, cfg: dict) -> dict:
         nd = np.asarray(cube.ndvi[l, y], dtype=np.float32)   # [B, P, P]
         g = cube.lcg[l]
         d = (nd[1:] - nd[:-1]) / bd                          # per day, adjacent bins both valid
+        # "clean" differences: both frames nearly cloud-free (limits residual cloud/haze contamination)
+        fv = np.isfinite(nd).mean((1, 2))
+        d[~((fv[1:] >= min_fv) & (fv[:-1] >= min_fv))] = np.nan
         s_bin = cube.wx[l, y, :, -1]
         for k in range(N_LC):
             sel = g == k
@@ -77,7 +81,7 @@ def fit_physics(cube, cfg: dict) -> dict:
     mu = np.stack([np.convolve(np.pad(r, 1, mode="edge"), ker, "valid") for r in mu])
     sd = np.stack([np.convolve(np.pad(r, 1, mode="edge"), ker, "valid") for r in sd])
     return {"r_inc": r_inc.tolist(), "r_dec": r_dec.tolist(), "mu": mu.tolist(), "sigma": sd.tolist(),
-            "count": cnt.tolist(), "percentile": pct, "fitted_on": "train locations x train years"}
+            "count": cnt.tolist(), "percentile": pct, "min_frame_valid": min_fv, "fitted_on": "train locations x train years"}
 
 
 class Physics:

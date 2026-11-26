@@ -42,10 +42,13 @@ def physics_aux_losses(model, diff: Diffusion, phys: Physics, batch: dict, x_t, 
         normal = 1.0 - batch["drought"]
         out["phen"] = pcfg["lambda_phen"] * (w * phys.phen_energy(x0_hat, batch, normal)).mean()
     if "mono" in cons and pcfg["lambda_mono"] > 0:
-        amt = torch.empty(x_t.shape[0]).uniform_(0.5, 1.5)
-        b2 = with_weather(batch, stress_weather(batch["wx_raw"], K, amt), wx_mean, wx_std, K)
-        x0_s = diff.x0_from_out(x_t, t, model(x_t, t, b2))
-        out["mono"] = pcfg["lambda_mono"] * (w * phys.mono_energy(x0_s, x0_hat, pcfg["mono_eps"])).mean()
+        # applied to the first half of the batch to save compute (CPU budget)
+        h = max(1, x_t.shape[0] // 2)
+        sub = {k: v[:h] for k, v in batch.items()}
+        amt = torch.empty(h).uniform_(0.5, 1.5)
+        b2 = with_weather(sub, stress_weather(sub["wx_raw"], K, amt), wx_mean, wx_std, K)
+        x0_s = diff.x0_from_out(x_t[:h], t[:h], model(x_t[:h], t[:h], b2))
+        out["mono"] = pcfg["lambda_mono"] * (w[:h] * phys.mono_energy(x0_s, x0_hat[:h], pcfg["mono_eps"])).mean()
     return out
 
 

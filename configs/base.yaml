@@ -64,6 +64,7 @@ train:
   threads: 14
 physics:
   rate_percentile: 99.5
+  rate_min_frame_valid: 0.95   # clean differences: both frames >= 95 % valid pixels
   phen_k: 2.0
   mono_eps: 0.01
   lambda_rate: 1.0

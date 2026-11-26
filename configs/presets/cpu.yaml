@@ -1,6 +1,7 @@
 # Main preset on this machine (no CUDA GPU; Intel i7-13620H, 16 threads). Between smoke and small.
+# Throughput probe (2026-11-26, during download): base 32 / n_res 2: 1.3-1.7 s/step; n_res 1: ~1.0 s/step.
 window: {context: 8, horizon: 8, stride: 2, patch: 32}
-model: {base_ch: 32, ch_mult: [1, 2, 2], emb_dim: 128}
+model: {base_ch: 32, ch_mult: [1, 2, 2], emb_dim: 128, n_res: 1}
 diffusion: {timesteps: 1000, ddim_steps: 25}
-train: {batch_size: 32, steps: 12000, threads: 14}
+train: {batch_size: 32, steps: 8000, threads: 8, val_every: 1000}
 eval: {n_members: 20, n_eval_windows: 300, seeds: [0]}
