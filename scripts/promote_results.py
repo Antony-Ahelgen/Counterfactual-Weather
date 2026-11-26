@@ -30,7 +30,8 @@ def main() -> None:
     arch = res / f"archive_{a.archive_name}"
     arch.mkdir(parents=True, exist_ok=False)
     for item in list(res.iterdir()):
-        if item.name in KEEP or item == src or item.name.startswith("archive_"):
+        # other complete runs (e.g. results/medium) stay where they are as references
+        if item.name in KEEP or item == src or item.name.startswith(("archive_", "medium")):
             continue
         shutil.move(str(item), str(arch / item.name))
     for item in list(src.iterdir()):

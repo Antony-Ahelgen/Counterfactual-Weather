@@ -1,0 +1,10 @@
+{
+ "eta": 0.0,
+ "rule": "cov90 closest to 0.9 among eta with val CRPS within 2% of eta=0; ties -> smaller eta",
+ "candidates": [
+  0.0,
+  0.5,
+  1.0
+ ],
+ "preset": "medium_tuned"
+}
