@@ -4,10 +4,10 @@
 |---|---|
 | OS | Windows 11 Home 10.0.26200 |
 | CPU | 13th Gen Intel Core i7-13620H, 16 logical threads |
-| RAM | 31.6 GB |
+| RAM | 31.6 GB | <!--noaudit-->
 | GPU | Intel UHD Graphics (no CUDA). `nvidia-smi` absent. |
 | Disk | 663 GB free on C: |
-| Python | 3.14.2 (venv `.venv`); brief asked 3.11, not installed |
+| Python | 3.14.2 (venv `.venv`); brief asked 3.11, not installed | <!--noaudit-->
 | PyTorch | 2.15.0+cpu (CPU wheel index) |
 | git | present; `gh` CLI **not installed**; `make` not installed (use `tasks.py`) |
 | CDS key | `~/.cdsapirc` absent (checked with `test -f` only) |

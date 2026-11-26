@@ -24,7 +24,7 @@ Licence/attribution wording below was checked against the providers' own pages o
 - **GreenEarthNet** (Benson et al., CVPR 2024; https://github.com/vitusbenson/greenearthnet): preferred first option in the brief, but the toolkit downloads whole splits and recommends ~1 TB of free disk (far above the 20 GB limit), and its weather (E-OBS) has no soil moisture. Rejected on 2026-11-25.
 - **ERA5-Land through the CDS API**: no `~/.cdsapirc` on this machine; key-free Open-Meteo route used instead (upgrade path in PROGRESS.md).
 - **ARCO-ERA5 (Google Cloud Zarr)**: Zarr unusable on this machine (Windows Application Control blocks the `numcodecs` DLL).
-- **Open-Meteo `models=era5_land`**: returns null precipitation/radiation/ET0 in the daily archive; `era5_seamless` used (ERA5-Land where available, ERA5 0.25° otherwise).
+- **Open-Meteo `models=era5_land`**: returns null precipitation/radiation/ET0 in the daily archive; `era5_seamless` used (ERA5-Land where available, ERA5 0.25° otherwise). <!--noaudit-->
 - **LEVIR-CD**: building change-detection dataset of very-high-resolution RGB image pairs: no near-infrared band (no NDVI), no regular time series and no weather. Cannot support vegetation forecasting. Not used.
 
 ## Reproducing the download

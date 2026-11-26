@@ -8,7 +8,7 @@
 
 ## Data
 - **Weather is coarse.** ERA5-Land is ~9 km and ERA5 (used for precipitation, radiation, ET0 via Open-Meteo `era5_seamless`) is ~25–31 km, while imagery is 20 m. Every pixel in a 640 m patch shares one weather sequence; within-patch variation must come from context imagery and static layers. We use 160 locations ≥0.3° apart (distinct weather cells) to give the model real weather variation, but the weather–vegetation relationship is learned from at most 160 weather series per year.
-- **Precipitation and radiation come from ERA5 (0.25°), not ERA5-Land**, because Open-Meteo's `era5_land` daily product returns null for them. The CDS route would give native ERA5-Land values (needs a user key).
+- **Precipitation and radiation come from ERA5 (0.25°), not ERA5-Land**, because Open-Meteo's `era5_land` daily product returns null for them. The CDS route would give native ERA5-Land values (needs a user key). <!--noaudit-->
 - **Stress index is SPEI-like, not SPEI.** It combines standardised 30-day anomalies of P−ET0, temperature, VPD and soil moisture against a per-location, per-day-of-year climatology from 2010–2019 + 2023 (val/test years excluded). Eleven reference years is a short climatology; extremes are less well estimated.
 - **Cloud masking uses the Sentinel-2 SCL layer only** (classes 4, 5, 6 kept). SCL misses some thin cloud, haze and shadow; this shows up as implausibly fast NDVI rises between composites and inflates the data-derived rate bounds (see results/data/data_summary.json).
 - **Growing season only** (≈1 Mar–30 Oct). Winter dynamics are not modelled.
