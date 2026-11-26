@@ -84,7 +84,7 @@ def main() -> None:
     xa, xb = r["xa"].mean(0), r["xb"].mean(0)
     H = obs.shape[0]
     frames = sorted({1, H // 2, H - 1})
-    fig, ax = plt.subplots(len(frames), 5, figsize=(plotting.COL_W, 0.95 * len(frames) + 0.4))
+    fig, ax = plt.subplots(len(frames), 5, figsize=(plotting.COL_W, 0.95 * len(frames) + 0.9), layout="constrained")
     vmax_d = max(0.02, float(np.nanpercentile(np.abs(sm["mean"]), 98)))
     titles = ["Observed", "Normal fc.", "Drought fc.", "Δ mean", "Δ s.d."]
     ims = []
@@ -95,6 +95,7 @@ def main() -> None:
                                                       (sm["mean"][h], plotting.DIV_CMAP, -vmax_d, vmax_d),
                                                       (sm["sd"][h], "Greys", 0, vmax_d)]):
             im = ax[rr, cc].imshow(img, cmap=cmap, vmin=vmin, vmax=vmax)
+            ax[rr, cc].set_facecolor("0.85")   # grey = no cloud-free observation
             ax[rr, cc].set_xticks([])
             ax[rr, cc].set_yticks([])
             if rr == 0:
@@ -102,7 +103,11 @@ def main() -> None:
                 ims.append(im)
         ax[rr, 0].set_ylabel(f"+{5 * (h + 1)} d")
     for cc, lab in [(2, "NDVI"), (3, "Δ NDVI"), (4, "s.d.")]:
-        fig.colorbar(ims[cc], ax=ax[:, cc], fraction=0.05, pad=0.02, label=lab)
+        cb = fig.colorbar(ims[cc], ax=ax[-1, cc] if cc > 2 else ax[-1, :3], location="bottom", shrink=0.9, label=lab)
+        if cc > 2:
+            from matplotlib.ticker import MaxNLocator
+            cb.locator = MaxNLocator(3)
+            cb.update_ticks()
     fig.suptitle(f"{res['loc_id']} {res['year']}: drought ({d_method}) vs normal ({n_method}, "
                  f"{len(normal)} analogs); {M} members, CRN", fontsize=6)
     plotting.save(fig, out / "demo_maps")
