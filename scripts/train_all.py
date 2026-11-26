@@ -58,8 +58,13 @@ def main() -> None:
     ap.add_argument("--seeds", nargs="*", type=int, default=None)
     ap.add_argument("--steps", type=int, default=None)
     ap.add_argument("--smoke", action="store_true", help="real-data test fixture")
+    ap.add_argument("--threads", type=int, default=None)
     a = ap.parse_args()
     cfg = load_preset(a.preset)
+    if a.threads:
+        cfg["train"]["threads"] = a.threads
+    lam_f = ROOT / "results" / ("smoke/" if a.smoke else "") / "val" / "lambda_choice.json"
+    lam_scale = json.loads(lam_f.read_text())["lambda_scale"] if lam_f.exists() else 1.0
     pdir = ROOT / ("data/smoke" if a.smoke else cfg["data"]["processed_dir"])
     cube = Cube.load(pdir / "cube")
     stats = json.loads((pdir / "stats.json").read_text())
@@ -68,6 +73,11 @@ def main() -> None:
     for seed in seeds:
         for v in a.variants:
             c, kind, use_phys = variant_cfg(cfg, v)
+            if use_phys and not v.startswith("diff_phys_l"):
+                # lambda scale selected on VALIDATION (run_pipeline stage 3); recorded in train_meta.json
+                for k in ["lambda_rate", "lambda_phen", "lambda_mono"]:
+                    c["physics"][k] *= lam_scale
+                c["physics"]["lambda_scale_selected"] = lam_scale
             out = run_dir(a.preset, v, seed, a.smoke)
             if (out / "final.pt").exists():
                 print(f"skip {v} seed {seed}: final.pt exists", flush=True)

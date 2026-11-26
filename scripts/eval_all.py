@@ -55,6 +55,9 @@ class Ctx:
         self.wx_mean = torch.tensor(self.stats["wx_mean"])
         self.wx_std = torch.tensor(self.stats["wx_std"])
         self.runs = ROOT / "runs" / (preset + ("_smoke" if smoke else ""))
+        g_f = ROOT / "results" / ("smoke/" if smoke else "") / "val" / "guidance_choice.json"
+        if g_f.exists():   # guidance scale selected on VALIDATION (run_pipeline stage 5)
+            self.cfg["physics"]["guidance_scale"] = json.loads(g_f.read_text())["guidance_scale"]
 
     def model(self, run: str, kind: str = "diffusion"):
         d = self.runs / f"{run}_s{self.seed}"
