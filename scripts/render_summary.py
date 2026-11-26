@@ -131,8 +131,8 @@ def main() -> None:
                                                          "perm_real_contrast", "perm_p_one_sided", "corr",
                                                          "bias_model_minus_did", "did_in_model_90pi", "n_matched"] if k in s)
         verdicts.append(("Drought-attributable vegetation loss can be estimated credibly",
-                         "not tested" if not checks else ("supported" if n == len(checks) == 4 else
-                                                          "partly supported (not all checks could run)" if n == len(checks) else
+                         "insufficient evidence (fewer than 3 of 4 checks could run)" if len(checks) < 3 else
+                         ("supported" if n == len(checks) == 4 else
                                                           ("partly supported" if n >= 2 else "not supported")),
                          ev + ". Source: results/validation/validation_summary.csv"))
     # ---- C5 calibration
