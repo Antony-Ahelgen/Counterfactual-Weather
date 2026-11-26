@@ -27,8 +27,8 @@ Not needed: the pipeline uses Open-Meteo era5_seamless (key-free).
 - 2026-11-26 Throughput (during download): ~1.0 s/step (n_res 1, 8 threads), physics model ~2x. cpu preset: 8000 steps.
 - 2026-11-26 Rate bounds: 99.5th pct of clean diffs (both frames >=95 % valid) still ~0.06 NDVI/day (residual cloud/haze); documented in LIMITATIONS.
 
+- 2026-11-26 14:57 Heartbeat: S2 download running (56/160, ETA ~18:30 IST if laptop stays awake). Watcher `scripts/after_download.py` running in background (log runs/after_download.log): fills gaps then runs `scripts/run_pipeline.py --preset cpu --parallel 2` (log runs/pipeline.log). Paper assets, summary renderer, audit, README done and smoke-tested.
+
 ## Next
-1. When `runs/download/s2.log` reaches 160/160 (or ends): re-run `python scripts/download_data.py --stage s2 --workers 5` to fill any failures, then
-   `python scripts/run_pipeline.py --preset cpu --parallel 2 > runs/pipeline_stdout.log 2>&1` (resumable; stages skip when outputs exist).
-2. While it runs: paper_assets.py (figures + LaTeX tables), render_summary.py (RESULTS_SUMMARY + claim check), red-team review, AUDIT.md.
-3. Tags: v0.1-data after build_data; v0.2-baselines/v0.3-diffusion after stage 2; v0.4-physics after stage 4; v0.5/v0.6 after stage 6.
+1. If the watcher is not running after a restart: `python scripts/after_download.py` (or, if the download is done, `python scripts/run_pipeline.py --preset cpu --parallel 2`). Both resumable.
+2. After pipeline: `python tasks.py paper-assets`; tag v0.1..v0.6/v1.0; red-team review; AUDIT.md; clean-checkout test; paper draft (P1).
