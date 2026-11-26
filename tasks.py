@@ -35,11 +35,12 @@ def main() -> None:
     elif t == "data":
         run(PY, "scripts/build_data.py", "--preset", p)
     elif t == "train":
-        run(PY, "scripts/train_all.py", "--preset", p)
+        run(PY, "scripts/run_pipeline.py", "--preset", p)
     elif t == "eval":
-        run(PY, "scripts/eval_all.py", "--preset", p)
+        # evaluation, effects, validation and demo are the last (resumable) stage of the pipeline
+        run(PY, "scripts/run_pipeline.py", "--preset", p)
     elif t == "paper-assets":
-        run(PY, "scripts/paper_assets.py", "--preset", p)
+        run(PY, "scripts/paper_assets.py")
         run(PY, "scripts/render_summary.py")
         run(PY, "scripts/audit_numbers.py")
     elif t == "audit":
