@@ -1,0 +1,66 @@
+"""Reduced-scale REAL-data pipeline (preset `fast`), chosen by the project owner for time reasons.
+
+  python scripts/run_fast.py
+Differences from scripts/run_pipeline.py (all documented in docs/LIMITATIONS.md):
+  - 69 locations (downloads completed at the time), re-split 70/15/15 before training (manifests/locations_fast.csv)
+  - 3 trained models (det, diff_plain, diff_phys) x 2500 steps; lambda NOT tuned (config values)
+  - physics ablation through sampling variants (guidance / projection on/off), not retrained models
+  - guidance scale chosen on VALIDATION with the same pre-registered rule, smaller grid {0, 0.01, 0.1}
+  - test: 100 windows, 8 members for every probabilistic variant; effects: 80 windows, 8 members
+Resumable: every stage is skipped when its output exists.
+"""
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+import run_pipeline as rp  # noqa: E402
+
+P = "fast"
+GAMMAS = [0.01, 0.1]
+
+
+def main() -> None:
+    rp.GAMMAS = GAMMAS
+    (ROOT / "runs").mkdir(exist_ok=True)
+    proc = ROOT / "data" / "processed_fast"
+    res = ROOT / "results"
+    val = res / "val"
+    val.mkdir(parents=True, exist_ok=True)
+    if not (proc / "clim.npy").exists():
+        rp.run(["scripts/build_data.py", "--preset", P], ROOT / "runs" / "build_data_fast.log")
+    rp.log("fast: train det, diff_plain, diff_phys (parallel)")
+    rp.run_parallel(rp.train_jobs(P, ["det", "diff_plain", "diff_phys"], None, 5), 3)
+    g_f = val / "guidance_choice.json"
+    if not g_f.exists():
+        rp.log("fast: guidance sweep on validation")
+        rp.run(["scripts/eval_all.py", "--preset", P, "--split", "val", "--tag", "val_guidance", "--members", "8",
+                "--n_windows", "40", "--reference", "diff_phys+P", "--variants", "diff_phys+P"] +
+               [f"diff_phys+Gx{g}+P" for g in GAMMAS], ROOT / "runs" / "eval_val_guidance.log")
+        g = rp.choose_gamma(pd.read_csv(res / "val_guidance" / "metrics.csv"))
+        g_f.write_text(json.dumps({"guidance_scale": g, "rule": "largest gamma with val CRPS within 2% of gamma=0 "
+                                   "(with projection)", "candidates": [0.0] + GAMMAS, "preset": P}, indent=1))
+        rp.log(f"chosen guidance scale = {g}")
+    if not (res / "test" / "metrics.csv").exists():
+        rp.run(["scripts/eval_all.py", "--preset", P, "--split", "test", "--tag", "test", "--n_windows", "100",
+                "--members", "8", "--variants", "observed", "persistence", "climatology", "clim_anomaly", "det",
+                "diff_plain", "diff_phys+G+P", "diff_phys", "diff_phys+G", "diff_phys+P", "diff_plain+G+P"],
+               ROOT / "runs" / "eval_test.log")
+    if not (res / "effects" / "effects_det_s0.csv").exists():
+        rp.run(["scripts/effects.py", "--preset", P, "--members", "8", "--max_windows", "80"],
+               ROOT / "runs" / "effects.log")
+    rp.run(["scripts/validate.py", "--preset", P], ROOT / "runs" / "validate.log")
+    rp.run(["scripts/counterfactual_demo.py", "--preset", P, "--members", "8"], ROOT / "runs" / "demo.log")
+    rp.run(["scripts/paper_assets.py"], ROOT / "runs" / "paper_assets.log")
+    rp.run(["scripts/render_summary.py"], ROOT / "runs" / "render_summary.log")
+    rp.log("FAST PIPELINE DONE")
+
+
+if __name__ == "__main__":
+    main()
