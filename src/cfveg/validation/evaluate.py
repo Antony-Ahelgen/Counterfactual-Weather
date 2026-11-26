@@ -52,7 +52,8 @@ def diffusion_variant(sampler, name: str) -> Variant:
         g = torch.Generator().manual_seed(s)
         noise = torch.randn((m, *b["tgt"].shape), generator=g)
         big = {k: v.repeat(m, *([1] * (v.ndim - 1))) for k, v in b.items()}
-        x = sampler.sample(big, noise.view(m * B, *b["tgt"].shape[1:]))
+        keys = torch.arange(m * B)                     # same seed + same keys -> CRN in the monotone test
+        x = sampler.sample(big, noise.view(m * B, *b["tgt"].shape[1:]), z_keys=keys, z_seed=s)
         return scaled_to_ndvi(x).view(m, B, *b["tgt"].shape[1:])
     return Variant(name, f, True, True)
 

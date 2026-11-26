@@ -62,12 +62,15 @@ class Ctx:
         g_f = RESULTS / ("smoke/" if smoke else "") / "val" / "guidance_choice.json"
         if g_f.exists():   # guidance scale selected on VALIDATION (run_pipeline stage 5)
             self.cfg["physics"]["guidance_scale"] = json.loads(g_f.read_text())["guidance_scale"]
+        e_f = g_f.with_name("eta_choice.json")
+        self.cfg["diffusion"]["eta"] = json.loads(e_f.read_text())["eta"] if e_f.exists() else 0.0
 
     def model(self, run: str, kind: str = "diffusion"):
         d = self.runs / f"{run}_s{self.seed}"
         return load_model(self.cfg, d / "final.pt", kind)
 
-    def sampler(self, run: str, guidance: bool, projection: bool, scale: float | None) -> Sampler:
+    def sampler(self, run: str, guidance: bool, projection: bool, scale: float | None,
+                eta: float | None = None) -> Sampler:
         p = self.cfg["physics"]
         cons = tuple(p["constraints"])
         m = re.match(r"diff_phys_no_(\w+)", run)
@@ -76,7 +79,7 @@ class Ctx:
         o = SamplerOpts(guidance=guidance, guidance_scale=scale if scale is not None else p["guidance_scale"],
                         projection=projection, ddim_steps=self.cfg["diffusion"]["ddim_steps"],
                         lambda_rate=p["lambda_rate"], lambda_phen=p["lambda_phen"], lambda_range=p["lambda_range"],
-                        constraints=cons)
+                        constraints=cons, eta=self.cfg["diffusion"].get("eta", 0.0) if eta is None else eta)
         return Sampler(self.model(run), self.diff, self.phys, o)
 
     def variant(self, spec: str):
@@ -86,15 +89,17 @@ class Ctx:
         if spec == "det":
             return deterministic_variant(self.model("det", "deterministic"))
         parts = spec.split("+")
-        run, guidance, projection, scale = parts[0], False, False, None
+        run, guidance, projection, scale, eta = parts[0], False, False, None, None
         for p in parts[1:]:
-            if p.startswith("G"):
+            if p.startswith("Ex"):
+                eta = float(p[2:])
+            elif p.startswith("G"):
                 guidance = True
                 if p.startswith("Gx"):
                     scale = float(p[2:])
             elif p == "P":
                 projection = True
-        v = diffusion_variant(self.sampler(run, guidance, projection, scale), spec)
+        v = diffusion_variant(self.sampler(run, guidance, projection, scale, eta), spec)
         return v
 
 

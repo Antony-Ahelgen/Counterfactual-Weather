@@ -32,6 +32,7 @@ def main() -> None:
     ap.add_argument("--preset", default="fast")
     ap.add_argument("--test_windows", default="100")
     ap.add_argument("--effect_windows", default="80")
+    ap.add_argument("--eta_grid", default="", help="e.g. 0.5,1.0: select DDIM eta on validation (0 always included)")
     a = ap.parse_args()
     P = a.preset
     sys.path.insert(0, str(ROOT / "src"))
@@ -58,6 +59,22 @@ def main() -> None:
         g_f.write_text(json.dumps({"guidance_scale": g, "rule": "largest gamma with val CRPS within 2% of gamma=0 "
                                    "(with projection)", "candidates": [0.0] + GAMMAS, "preset": P}, indent=1))
         rp.log(f"chosen guidance scale = {g}")
+    e_f = val / "eta_choice.json"
+    if a.eta_grid and not e_f.exists():
+        etas = [float(x) for x in a.eta_grid.split(",")]
+        rp.log(f"eta sweep on validation: {[0.0] + etas}")
+        rp.run(["scripts/eval_all.py", "--preset", P, "--split", "val", "--tag", "val_eta", "--members", "8",
+                "--n_windows", "40", "--reference", "diff_phys+G+P", "--variants", "diff_phys+G+P"] +
+               [f"diff_phys+G+P+Ex{e}" for e in etas], ROOT / "runs" / "eval_val_eta.log")
+        vm = pd.read_csv(res / "val_eta" / "metrics.csv")
+        base = vm[vm.variant == "diff_phys+G+P"].iloc[-1]
+        cands = [(0.0, base.crps, base.cov90)] + [
+            (e, r.crps, r.cov90) for e in etas for _, r in vm[vm.variant == f"diff_phys+G+P+Ex{e}"].tail(1).iterrows()]
+        ok = [(abs(c90 - 0.9), e) for e, c, c90 in cands if c <= 1.02 * base.crps]
+        eta = sorted(ok)[0][1]
+        e_f.write_text(json.dumps({"eta": eta, "rule": "cov90 closest to 0.9 among eta with val CRPS within 2% of "
+                                   "eta=0; ties -> smaller eta", "candidates": [0.0] + etas, "preset": P}, indent=1))
+        rp.log(f"chosen eta = {eta}")
     if not (res / "test" / "metrics.csv").exists():
         rp.run(["scripts/eval_all.py", "--preset", P, "--split", "test", "--tag", "test", "--n_windows", a.test_windows,
                 "--members", "8", "--variants", "observed", "persistence", "climatology", "clim_anomaly", "det",

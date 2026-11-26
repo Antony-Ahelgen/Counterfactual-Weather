@@ -73,8 +73,14 @@ class Diffusion:
     @torch.no_grad()
     def sample(self, model, batch: dict, noise: torch.Tensor, steps: int = 25,
                guidance: Callable | None = None, guidance_scale: float = 0.0,
-               projection: Callable | None = None, x0_hook: Callable | None = None) -> torch.Tensor:
-        """Deterministic DDIM (eta=0) from the given initial noise (common random numbers)."""
+               projection: Callable | None = None, x0_hook: Callable | None = None, eta: float = 0.0,
+               z_keys: torch.Tensor | None = None, z_seed: int = 0) -> torch.Tensor:
+        """DDIM from the given initial noise. eta=0: deterministic; eta>0: stochastic DDIM (eta=1 ~ DDPM).
+        Step noise is drawn per key: rows with the same z_key get IDENTICAL step noise (common random numbers
+        between paired branches); default keys = row index (independent rows)."""
+        if eta > 0:
+            keys = z_keys if z_keys is not None else torch.arange(noise.shape[0])
+            uniq = torch.unique(keys).tolist()
         x = noise
         ts = self.ddim_timesteps(steps)
         for i, ti in enumerate(ts):
@@ -101,8 +107,16 @@ class Diffusion:
             if i == len(ts) - 1:
                 x = x0
             else:
-                ab_next = self.ab[ts[i + 1]]
-                x = ab_next.sqrt() * x0 + (1 - ab_next).sqrt() * eps
+                ab_t, ab_next = self.ab[ti], self.ab[ts[i + 1]]
+                if eta > 0:
+                    sigma = eta * ((1 - ab_next) / (1 - ab_t)).sqrt() * (1 - ab_t / ab_next).sqrt()
+                    z = torch.empty_like(x)
+                    for k in uniq:
+                        g = torch.Generator().manual_seed(int(z_seed) * 1_000_003 + int(k) * 7919 + i)
+                        z[keys == k] = torch.randn(x.shape[1:], generator=g)
+                    x = ab_next.sqrt() * x0 + (1 - ab_next - sigma ** 2).clamp(min=0).sqrt() * eps + sigma * z
+                else:
+                    x = ab_next.sqrt() * x0 + (1 - ab_next).sqrt() * eps
         return x
 
 

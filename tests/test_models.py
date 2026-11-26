@@ -112,3 +112,20 @@ def test_ddim_deterministic_given_noise(setup):
     a = d.sample(m, b, n, steps=5)
     c = d.sample(m, b, n.clone(), steps=5)
     assert torch.equal(a, c)
+
+
+def test_stochastic_ddim_keys_give_crn(setup):
+    """eta>0: rows with the same z_key get identical step noise (CRN); different keys differ; reproducible."""
+    cfg, b = setup
+    seed_everything(0)
+    m = build_unet(cfg).eval()
+    d = Diffusion(100)
+    n = torch.randn_like(b["tgt"][:1]).repeat(4, 1, 1, 1)
+    bb = {k: v[:1].repeat(4, *([1] * (v.ndim - 1))) for k, v in b.items()}
+    x = d.sample(m, bb, n, steps=5, eta=1.0, z_keys=torch.tensor([0, 0, 1, 1]), z_seed=3)
+    assert torch.allclose(x[0], x[1]) and torch.allclose(x[2], x[3])
+    assert not torch.allclose(x[0], x[2])
+    x2 = d.sample(m, bb, n, steps=5, eta=1.0, z_keys=torch.tensor([0, 0, 1, 1]), z_seed=3)
+    assert torch.equal(x, x2)
+    x0 = d.sample(m, bb, n, steps=5, eta=0.0)
+    assert torch.allclose(x0[0], x0[2])            # eta=0 stays deterministic given identical inputs

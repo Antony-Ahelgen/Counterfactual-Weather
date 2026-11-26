@@ -60,7 +60,8 @@ def window_effects(forecast_fn, sample: dict, sb, l: int, yi: int, t0: int, n: i
             nd[iD * n:(iD + 1) * n] = xd
             from ..data.dataset import ndvi_to_scaled
             return ndvi_to_scaled(nd)
-    x = scaled_to_ndvi(forecast_fn(big, nz, hook))
+    keys = torch.cat([torch.arange(n) + (10_000 if k == "Ni" else 0) for k in names])
+    x = scaled_to_ndvi(forecast_fn(big, nz, hook, keys, seed))
     xs = {k: x[i * n:(i + 1) * n] for i, k in enumerate(names)}
     am = lambda t: t.mean((1, 2, 3)).numpy()  # noqa: E731
     dDN = xs["D"] - xs["N"]
@@ -79,14 +80,14 @@ def window_effects(forecast_fn, sample: dict, sb, l: int, yi: int, t0: int, n: i
 
 
 def sampler_forecast_fn(sampler):
-    def f(batch, noise, hook):
-        return sampler.sample(batch, noise, x0_hook=hook)
+    def f(batch, noise, hook, keys=None, seed=0):
+        return sampler.sample(batch, noise, x0_hook=hook, z_keys=keys, z_seed=seed)
     return f
 
 
 def det_forecast_fn(model):
     @torch.no_grad()
-    def f(batch, noise, hook):
+    def f(batch, noise, hook, keys=None, seed=0):
         out = model(None, torch.zeros(batch["tgt"].shape[0], dtype=torch.long), batch)
         if hook is not None:
             out = hook(out, 0)

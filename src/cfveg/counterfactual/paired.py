@@ -27,6 +27,7 @@ class SamplerOpts:
     lambda_phen: float = 0.5
     lambda_range: float = 1.0
     constraints: tuple = ("rate", "phen", "mono")
+    eta: float = 0.0
 
 
 class Sampler:
@@ -47,11 +48,12 @@ class Sampler:
     def project(self, x0: torch.Tensor, batch: dict) -> torch.Tensor:
         return self.phys.project(x0, batch, rate=self.o.projection_rate and "rate" in self.o.constraints)
 
-    def sample(self, batch: dict, noise: torch.Tensor, x0_hook=None) -> torch.Tensor:
+    def sample(self, batch: dict, noise: torch.Tensor, x0_hook=None, z_keys=None, z_seed: int = 0) -> torch.Tensor:
         g = self.energy if (self.o.guidance and self.phys is not None) else None
         p = self.project if (self.o.projection and self.phys is not None) else None
         return self.diff.sample(self.model, batch, noise, self.o.ddim_steps, guidance=g,
-                                guidance_scale=self.o.guidance_scale, projection=p, x0_hook=x0_hook)
+                                guidance_scale=self.o.guidance_scale, projection=p, x0_hook=x0_hook,
+                                eta=self.o.eta, z_keys=z_keys, z_seed=z_seed)
 
 
 def repeat_batch(sample: dict, n: int) -> dict:
@@ -87,7 +89,8 @@ def estimate_effect(sampler: Sampler, sample: dict, wx_a: list[np.ndarray], wx_b
             nd = scaled_to_ndvi(x0)
             xb = torch.minimum(nd[M:], nd[:M] + coupling_delta)
             return ndvi_to_scaled(torch.cat([nd[:M], xb]))
-    x = scaled_to_ndvi(sampler.sample(both, noise, x0_hook=hook))
+    keys = torch.cat([torch.arange(n_members), torch.arange(n_members) + (0 if crn else 10_000)])
+    x = scaled_to_ndvi(sampler.sample(both, noise, x0_hook=hook, z_keys=keys, z_seed=seed))
     xa, xb = x[:n_members], x[n_members:]
     return {"xa": xa.numpy(), "xb": xb.numpy(), "delta": (xb - xa).numpy()}
 
