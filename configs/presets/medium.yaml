@@ -1,0 +1,9 @@
+# Reduced-scale REAL-data run, larger than `fast` (owner request 2026-11-26, deadline 20:30 IST): all locations whose
+# Sentinel-2 download completed by the cut-off, re-split 70/15/15 with the same rule and seed BEFORE any training
+# (manifests/locations_medium.csv); 3000 training steps; evaluation as in `fast`. Same architecture as `cpu`/`fast`.
+data: {processed_dir: data/processed_medium, locations_file: manifests/locations_medium.csv}
+window: {context: 8, horizon: 8, stride: 2, patch: 32}
+model: {base_ch: 32, ch_mult: [1, 2, 2], emb_dim: 128, n_res: 1}
+diffusion: {timesteps: 1000, ddim_steps: 25}
+train: {batch_size: 32, steps: 3000, threads: 5, val_every: 500, ckpt_every: 500}
+eval: {n_members: 8, n_eval_windows: 120, seeds: [0]}

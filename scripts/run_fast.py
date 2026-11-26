@@ -11,7 +11,9 @@ Resumable: every stage is skipped when its output exists.
 """
 from __future__ import annotations
 
+import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -22,19 +24,28 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import run_pipeline as rp  # noqa: E402
 
-P = "fast"
 GAMMAS = [0.01, 0.1]
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--preset", default="fast")
+    ap.add_argument("--test_windows", default="100")
+    ap.add_argument("--effect_windows", default="80")
+    a = ap.parse_args()
+    P = a.preset
+    sys.path.insert(0, str(ROOT / "src"))
+    from cfveg.utils.provenance import load_preset
+
     rp.GAMMAS = GAMMAS
     (ROOT / "runs").mkdir(exist_ok=True)
-    proc = ROOT / "data" / "processed_fast"
-    res = ROOT / "results"
+    proc = ROOT / load_preset(P)["data"]["processed_dir"]
+    res = Path(os.environ.get("CFVEG_RESULTS", str(ROOT / "results")))
+    res = res if res.is_absolute() else ROOT / res
     val = res / "val"
     val.mkdir(parents=True, exist_ok=True)
     if not (proc / "clim.npy").exists():
-        rp.run(["scripts/build_data.py", "--preset", P], ROOT / "runs" / "build_data_fast.log")
+        rp.run(["scripts/build_data.py", "--preset", P], ROOT / "runs" / f"build_data_{P}.log")
     rp.log("fast: train det, diff_plain, diff_phys (parallel)")
     rp.run_parallel(rp.train_jobs(P, ["det", "diff_plain", "diff_phys"], None, 5), 3)
     g_f = val / "guidance_choice.json"
@@ -48,18 +59,18 @@ def main() -> None:
                                    "(with projection)", "candidates": [0.0] + GAMMAS, "preset": P}, indent=1))
         rp.log(f"chosen guidance scale = {g}")
     if not (res / "test" / "metrics.csv").exists():
-        rp.run(["scripts/eval_all.py", "--preset", P, "--split", "test", "--tag", "test", "--n_windows", "100",
+        rp.run(["scripts/eval_all.py", "--preset", P, "--split", "test", "--tag", "test", "--n_windows", a.test_windows,
                 "--members", "8", "--variants", "observed", "persistence", "climatology", "clim_anomaly", "det",
                 "diff_plain", "diff_phys+G+P", "diff_phys", "diff_phys+G", "diff_phys+P", "diff_plain+G+P"],
                ROOT / "runs" / "eval_test.log")
     if not (res / "effects" / "effects_det_s0.csv").exists():
-        rp.run(["scripts/effects.py", "--preset", P, "--members", "8", "--max_windows", "80"],
+        rp.run(["scripts/effects.py", "--preset", P, "--members", "8", "--max_windows", a.effect_windows],
                ROOT / "runs" / "effects.log")
     rp.run(["scripts/validate.py", "--preset", P], ROOT / "runs" / "validate.log")
     rp.run(["scripts/counterfactual_demo.py", "--preset", P, "--members", "8"], ROOT / "runs" / "demo.log")
     rp.run(["scripts/paper_assets.py"], ROOT / "runs" / "paper_assets.log")
     rp.run(["scripts/render_summary.py"], ROOT / "runs" / "render_summary.log")
-    rp.log("FAST PIPELINE DONE")
+    rp.log(f"FAST PIPELINE DONE ({P})")
 
 
 if __name__ == "__main__":
