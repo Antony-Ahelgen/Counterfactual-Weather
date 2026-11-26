@@ -22,6 +22,18 @@
 - Monotonicity is trained on a hand-designed stress perturbation of the weather (fixed direction in feature space) applied to half of each batch.
 - Rate bounds are the 99.5th percentile of clean consecutive differences (both frames ≥95 % valid) per land-cover group; they are loose because of residual cloud contamination and real abrupt events (harvest, mowing).
 
+## Reduced-scale run actually reported (preset `fast`)
+- Owing to time constraints, the project owner chose (2026-11-26) a reduced-scale run on real data instead of the
+  planned full run: the **69 of 160 locations** whose Sentinel-2 download had completed, re-split 70/15/15 with
+  the same rule and seed **before any training** (`manifests/locations_fast.csv`); **2500 training steps**; three
+  trained models (deterministic, diffusion without physics, diffusion with physics losses). Physics ablations
+  are obtained by switching guidance and projection on/off at sampling time; the per-constraint loss ablations
+  (retraining without each constraint) and the λ sweep were **not run**; λ values are the config defaults.
+- Evaluation uses 100 test windows and 8 ensemble members per probabilistic variant; effects use 80 windows. Ten
+  test locations make the bootstrap intervals over locations wide.
+- The full-scale pipeline (`scripts/run_pipeline.py`, preset `cpu`) is implemented and smoke-tested but was not
+  run to completion.
+
 ## Scope changes (honest record)
 - The semi-synthetic oracle (brief Phase 7, part 6, P2) was **not run**: the project owner instructed on 2026-11-26 that no synthetic data be used anywhere.
 - The optional Indian monsoon study area (P2) was not attempted.

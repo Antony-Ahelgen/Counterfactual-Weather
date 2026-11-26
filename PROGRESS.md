@@ -29,6 +29,10 @@ Not needed: the pipeline uses Open-Meteo era5_seamless (key-free).
 
 - 2026-11-26 14:57 Heartbeat: S2 download running (56/160, ETA ~18:30 IST if laptop stays awake). Watcher `scripts/after_download.py` running in background (log runs/after_download.log): fills gaps then runs `scripts/run_pipeline.py --preset cpu --parallel 2` (log runs/pipeline.log). Paper assets, summary renderer, audit, README done and smoke-tested.
 
+- 2026-11-26 15:10-16:20 Red-team review 1 fixed (see docs/AUDIT.md). Download hit intermittent DNS failures -> per-acquisition loading with retries.
+- 2026-11-26 Remote added: https://github.com/Antony-Ahelgen/Counterfactual-Weather (push pending: owner must sign in once as Antony-Ahelgen in their own terminal; stored credential was for another account).
+- 2026-11-26 ~16:30 Owner asked for fabricated data to finish in 2 h -> declined (never fabricate). Owner chose the FAST REAL run: 69 downloaded locations, re-split before training, preset `fast`, `scripts/run_fast.py` (log runs/run_fast.log, runs/pipeline.log).
+
 ## Next
-1. If the watcher is not running after a restart: `python scripts/after_download.py` (or, if the download is done, `python scripts/run_pipeline.py --preset cpu --parallel 2`). Both resumable.
-2. After pipeline: `python tasks.py paper-assets`; tag v0.1..v0.6/v1.0; red-team review; AUDIT.md; clean-checkout test; paper draft (P1).
+1. Wait for `scripts/run_fast.py` to finish (FAST PIPELINE DONE in runs/pipeline.log); resume by re-running it (resumable).
+2. Then: audit_numbers, red-team review 2 of results/claims, AUDIT.md final, tags v0.1..v1.0, clean-checkout test, paper draft, push once credentials work.
