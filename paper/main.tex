@@ -1,0 +1,134 @@
+% DRAFT: AI-assisted, author must verify every statement, number and reference before submission.
+% Plain article skeleton (Springer LNEE class not bundled; port to the publisher template for submission).
+\documentclass[10pt]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx,booktabs,amsmath,amssymb,hyperref,xcolor}
+\graphicspath{{../results/figures/}}
+\input{numbers.tex}
+\newcommand{\draftnote}[1]{\textcolor{gray}{[#1]}}
+
+\title{Counterfactual Vegetation Forecasting under Drought\\with Physics-Constrained Diffusion Models}
+\author{Antony Ahelgen A \and Ferjith J S \and V Muthulakshmi}
+\date{\textbf{DRAFT: AI-assisted, author must verify}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Satellites such as Sentinel-2 revisit the same land every few days, enabling vegetation monitoring through indices
+such as NDVI. During drought, decision-makers need to know how much worse vegetation is \emph{because of} the drought:
+a counterfactual question without observable ground truth. We train a weather-conditioned diffusion model that
+forecasts Sentinel-2 NDVI from past imagery, static land attributes and a weather sequence, and estimate the drought
+effect as the difference between forecasts of the same initial scene under a drought and a normal weather scenario,
+using common random numbers. Physical plausibility (growth/decline rate bounds, a seasonal phenology envelope and a
+monotone response to moisture stress) is imposed as auxiliary losses, sampling guidance and a final projection.
+Because the counterfactual is unobservable, we evaluate with a five-part framework: proxy back-tests, a matched
+natural experiment, placebo checks, calibration and constraint-violation rates. On \D{nloc} European locations
+(2017--2023) in a reduced-scale CPU study, \draftnote{one-sentence summary of the main findings, to be written from
+docs/RESULTS\_SUMMARY.md}.
+\end{abstract}
+
+\section{Introduction}
+Drought reduces vegetation productivity, with consequences for agriculture, insurance and food security.
+Operational vegetation monitoring relies on satellite indices such as NDVI from Sentinel-2. For damage assessment,
+insurance payouts and aid allocation, however, a forecast of future vegetation is not enough: what is needed is the
+\emph{drought-attributable} change, i.e.\ the difference between what happened and what would have happened under
+normal weather. This counterfactual is never observed, so it cannot be validated directly, and generative models may
+produce realistic-looking but physically implausible maps.
+
+We study whether a conditional diffusion model~\cite{ho2020ddpm,song2021ddim} with explicit physical constraints can
+(i) forecast NDVI at least as well as deterministic and unconstrained generative baselines while remaining sharp and
+physically consistent, and (ii) provide credible, uncertainty-aware estimates of drought effects. Our contributions
+are: a weather-conditioned diffusion forecaster with constraint losses, guidance and projection; a paired-sampling
+estimator of drought effects with common random numbers; and a validation framework for the unobservable
+counterfactual that includes observation-based checks and reports negative results.
+
+\section{Related work}
+Earth-surface and vegetation forecasting from Sentinel-2 with meteorological drivers was popularised by
+EarthNet2021~\cite{requena2021earthnet} and GreenEarthNet~\cite{benson2024greenearthnet}; deep-learning forecasts of
+vegetation response to extreme drought were studied by Kladny et al.~\cite{kladny2024enhanced}. Denoising diffusion
+models~\cite{ho2020ddpm} with improved noise schedules~\cite{nichol2021improved}, deterministic DDIM
+sampling~\cite{song2021ddim} and $v$-prediction~\cite{salimans2022progressive} provide sharp probabilistic
+generators; feature-wise linear modulation (FiLM)~\cite{perez2018film} is a standard conditioning mechanism. Drought
+is commonly quantified with standardised water-balance indices such as SPEI~\cite{vicente2010spei}; we use an
+SPEI-like multivariate stress index from ERA5/ERA5-Land reanalysis~\cite{hersbach2020era5,munoz2021era5land}.
+\draftnote{Authors: add related work on causal/counterfactual impact attribution and physics-guided generative
+models, with verified references only.}
+
+\section{Data}
+We sampled \D{nloc} locations in Central and Western Europe (at least 0.3$^\circ$ apart, at least 60\,\% vegetated
+according to ESA WorldCover~\cite{zanaga2022worldcover}) and built 64$\times$64-pixel, 20\,m patches of Sentinel-2
+L2A NDVI for March--October 2017--2023 as per-pixel median composites in 5-day bins, masking clouds, shadows and snow
+with the scene classification layer and correcting the processing-baseline reflectance offset. Daily weather
+(precipitation, temperature, dewpoint, vapour pressure deficit, radiation, top-layer soil moisture, reference
+evapotranspiration) comes from ERA5-Land/ERA5 via the Open-Meteo archive~\cite{zippenfenig2023openmeteo}; static inputs
+are Copernicus DEM elevation and slope and WorldCover land cover. A stress index $s$ combines standardised 30-day
+anomalies of water balance, temperature, VPD and soil moisture against a per-location climatology that excludes
+validation and test years; a forecast window is labelled drought if $s\ge 1$ on at least 30 horizon days.
+Locations are split \D{nloctrain}/\D{nlocval}/\D{nloctest} (train/validation/test) and years
+\{2017, 2018, 2019, 2023\}/\{2020\}/\{2021, 2022\}; a sample belongs to a split only if both its location and year
+do. All fitted quantities use the training split only (tested by leakage tests). The test split has \D{nwintest}
+forecast windows, of which a fraction \D{dfractest} are drought-labelled. About \D{validfrac} of all pixels are
+cloud-free.
+
+\section{Method}
+\paragraph{Forecaster.} Given $K{=}8$ context composites (40 days), validity masks and static layers, a compact U-Net
+predicts the next $H{=}8$ composites. The full weather sequence (context and horizon), day of year, horizon stress and
+a drought flag condition the network through FiLM. The diffusion model uses a cosine schedule with 1000 steps,
+$v$-prediction, a masked loss that ignores cloudy pixels, EMA weights and 25-step DDIM sampling.
+
+\paragraph{Physical constraints.} All constraints act on unscaled NDVI. (1) \emph{Rate bounds}: the daily change
+between consecutive frames, including the step from the last valid context observation over its true time gap, must
+lie within land-cover-specific bounds set to the 99.5th percentile of clean consecutive differences in the training
+data. (2) \emph{Phenology envelope}: forecasts must stay below $\mu+2\sigma$ of a land-cover and day-of-year
+climatology of non-drought training years, and above $\mu-2\sigma$ under the normal scenario. (3)
+\emph{Monotonicity}: for the same noisy input, a drier and hotter weather sequence must not yield higher NDVI. The
+constraints enter training as SNR-weighted auxiliary losses on the predicted clean sample, sampling as energy guidance
+with a scale chosen on validation data ($\gamma=\D{gamma}$), and a final projection onto the NDVI range and rate
+bounds.
+
+\paragraph{Counterfactual estimation.} For an initial scene, the horizon weather is replaced by a \emph{normal}
+scenario (an ensemble of near-typical analog training years at the same location) or a \emph{drought} scenario
+(the observed weather of a drought window, or a drought analog). Both branches start from identical noise for each
+ensemble member (common random numbers), and the effect is $\Delta = x^{\text{drought}} - x^{\text{normal}}$.
+
+\section{Experiments}
+\input{../results/tables/main.tex}
+\paragraph{Forecast skill and sharpness.} Table~\ref{tab:main} compares persistence, climatology, a deterministic
+U-Net with identical inputs, diffusion without physics and the physics-constrained diffusion model on held-out test
+locations and years. The physics-constrained model reaches a CRPS of \R{diff_phys_G_P}{crps} (95\,\% CI
+\R{diff_phys_G_P}{crpslo}--\R{diff_phys_G_P}{crpshi}) versus \R{diff_plain}{crps} for diffusion without physics and
+\R{det}{crps} for the deterministic network. Its sharpness ratios (prediction/observation) are
+\R{diff_phys_G_P}{grad_ratio} (gradient) and \R{diff_phys_G_P}{hf_ratio} (high-frequency power), compared with
+\R{det}{grad_ratio} and \R{det}{hf_ratio} for the deterministic network. \draftnote{Interpretation after results.}
+
+\input{../results/tables/ablation.tex}
+\paragraph{Physical consistency.} The observations themselves violate the phenology envelope in a fraction
+\R{observed}{phen_frac} of valid pixel-timesteps and the rate bounds in \R{observed}{rate_frac}. Diffusion without
+physics violates the envelope in \R{diff_plain}{phen_frac}, the loss-only physics model in \R{diff_phys}{phen_frac},
+and the full model in \R{diff_phys_G_P}{phen_frac}; monotone-response violations are \R{diff_plain}{mono_frac},
+\R{diff_phys}{mono_frac} and \R{diff_phys_G_P}{mono_frac}. \draftnote{Interpretation after results.}
+
+\section{Validation of drought-effect estimates}
+\input{../results/tables/validation.tex}
+\draftnote{Results of the five validation parts; numbers via macros from results/validation.}
+
+\section{Limitations}
+The drought effect is a model-based estimate, credible only if the model captures how weather drives vegetation and no
+unobserved factor drives both. Weather is coarse (9--31\,km) relative to 20\,m imagery. This is a reduced-scale CPU
+study: \D{nloc} locations, short training, one seed and small ensembles; confidence intervals over \D{nloctest} test
+locations are wide. The semi-synthetic oracle was not run (real data only), and per-constraint retraining ablations
+and the loss-weight sweep were not run. See \texttt{docs/LIMITATIONS.md}.
+
+\section{Conclusion}
+\draftnote{Written from the claim check in docs/RESULTS\_SUMMARY.md.}
+
+\paragraph{Data and code availability.} Contains modified Copernicus Sentinel data (2017--2023) and modified
+Copernicus Climate Change Service information. Weather data by Open-Meteo.com (CC BY 4.0). Produced using Copernicus
+WorldDEM-30 \copyright\ DLR e.V. 2010--2014 and \copyright\ Airbus Defence and Space GmbH 2014--2018 provided under
+COPERNICUS by the European Union and ESA; all rights reserved. \copyright\ ESA WorldCover project / Contains modified
+Copernicus Sentinel data (2021) processed by ESA WorldCover consortium. Code: \url{https://github.com/Antony-Ahelgen/Counterfactual-Weather}.
+
+\bibliographystyle{plain}
+\bibliography{refs}
+\end{document}
