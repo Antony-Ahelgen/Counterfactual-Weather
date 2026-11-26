@@ -1,0 +1,10 @@
+{
+ "lambda_scale": 3.0,
+ "rule": "lowest violations within 5% of best val CRPS",
+ "candidates": [
+  0.3,
+  1.0,
+  3.0
+ ],
+ "preset": "medium"
+}

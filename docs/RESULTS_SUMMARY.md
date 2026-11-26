@@ -36,7 +36,7 @@ Source: results/test/metrics.csv (95 % bootstrap CIs over locations in results/t
 - diff_phys: model anomaly on drought windows -0.0564 = 2.5 x the observed anomaly.
 - diff_plain: model anomaly on drought windows -0.0394 = 1.7 x the observed anomaly.
 - det: model anomaly on drought windows -0.0220 = 1.0 x the observed anomaly.
-- **A model anomaly well beyond the observed one is model bias, not a finding**: the diffusion models (especially with physics losses) attribute larger drought losses than observed; the deterministic network is closest to the observed anomaly.
+- Generated reading (thresholds: > 1.25x over-, < 0.8x under-estimation): over-estimate drought losses: diff_phys_G_P, diff_phys, diff_plain; under-estimate: none; closest to the observed anomaly: det. **A model anomaly far from the observed one is model bias, not a finding.**
 
 Δ = drought-scenario minus normal-scenario forecast (NDVI), ensemble and area mean. Compare the guided (+G+P) with the unguided physics model (diff_phys): guidance enforces the lower phenology bound only under the normal scenario, so part of a guided Δ can come from guidance. Source: results/effects/*.csv
 

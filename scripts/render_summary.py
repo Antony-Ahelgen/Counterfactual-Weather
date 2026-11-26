@@ -244,9 +244,15 @@ def main() -> None:
                         derived[f"anom_ratio_{v}"] = float(ne.loc[v, "anom_mean_model_drought"] / oa)
                         L.append(f"- {v}: model anomaly on drought windows {f(ne.loc[v, 'anom_mean_model_drought'], 4)} = "
                                  f"{f(ne.loc[v, 'anom_mean_model_drought'] / oa, 1)} x the observed anomaly.")
-                L.append("- **A model anomaly well beyond the observed one is model bias, not a finding**: the "
-                         "diffusion models (especially with physics losses) attribute larger drought losses than "
-                         "observed; the deterministic network is closest to the observed anomaly.")
+                ratios = {k.removeprefix("anom_ratio_"): v for k, v in derived.items() if k.startswith("anom_ratio_")}
+                if ratios:
+                    over = [k for k, v in ratios.items() if v > 1.25]
+                    under = [k for k, v in ratios.items() if v < 0.8]
+                    closest = min(ratios, key=lambda k: abs(np.log(max(ratios[k], 1e-6))))
+                    L.append("- Generated reading (thresholds: > 1.25x over-, < 0.8x under-estimation): "
+                             f"over-estimate drought losses: {', '.join(over) or 'none'}; under-estimate: "
+                             f"{', '.join(under) or 'none'}; closest to the observed anomaly: {closest}. "
+                             "**A model anomaly far from the observed one is model bias, not a finding.**")
         L += ["", "Δ = drought-scenario minus normal-scenario forecast (NDVI), ensemble and area mean. Compare the "
               "guided (+G+P) with the unguided physics model (diff_phys): guidance enforces the lower phenology bound "
               "only under the normal scenario, so part of a guided Δ can come from guidance. "

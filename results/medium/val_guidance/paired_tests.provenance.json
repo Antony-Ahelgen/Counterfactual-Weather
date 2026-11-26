@@ -1,0 +1,12 @@
+{
+  "result_file": "paired_tests.csv",
+  "command": "python.exe scripts/eval_all.py --preset medium --split val --tag val_guidance --members 8 --n_windows 40 --reference diff_phys+P --variants diff_phys+P diff_phys+Gx0.01+P diff_phys+Gx0.1+P",
+  "git_commit": "a49dcee6fd758ec349e6a217a7356e240db7788f",
+  "seed": 0,
+  "config": null,
+  "timestamp": "2026-11-26T18:50:05",
+  "python": "3.14.2",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "split": "val",
+  "bootstrap": "1000 x locations"
+}
