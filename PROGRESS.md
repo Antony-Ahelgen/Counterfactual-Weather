@@ -56,3 +56,6 @@ Not needed: the pipeline uses Open-Meteo era5_seamless (key-free).
    then promote: `python scripts/promote_results.py --src results/v2 --archive-name medium_tuned`, update paper/docs
    wording against the new numbers, audit, push.
 3. Authors: verify refs.bib, port paper to the Springer LNEE template, add related work on causal attribution.
+4. Reserved extra data (owner request): `scripts/fetch_extra.py` downloads up to 80 NEW locations (IDs X...,
+   manifests/locations_extra.csv) after the v2 test-set download. Not used by v2 (no leakage into its split).
+   Resume with `.venv\Scripts\python scripts\fetch_extra.py > runs\download\extra.log 2>&1` (log: runs/download/extra.log).
