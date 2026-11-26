@@ -46,7 +46,16 @@ def deterministic_variant(model, name: str = "det") -> Variant:
     return Variant(name, f, False, True)
 
 
-def diffusion_variant(sampler, name: str) -> Variant:
+def spread_scale(ens: torch.Tensor, factor: float) -> torch.Tensor:
+    """Post-hoc ensemble spread calibration: members moved away from / towards the ensemble mean by `factor`
+    (fitted on VALIDATION as skill/spread). factor = 1 leaves the ensemble unchanged. ens [M, ...]."""
+    if factor == 1.0 or ens.shape[0] < 2:
+        return ens
+    mu = ens.mean(0, keepdim=True)
+    return mu + factor * (ens - mu)
+
+
+def diffusion_variant(sampler, name: str, spread: float = 1.0) -> Variant:
     def f(b, m, s):
         B = b["tgt"].shape[0]
         g = torch.Generator().manual_seed(s)
@@ -54,7 +63,7 @@ def diffusion_variant(sampler, name: str) -> Variant:
         big = {k: v.repeat(m, *([1] * (v.ndim - 1))) for k, v in b.items()}
         keys = torch.arange(m * B)                     # same seed + same keys -> CRN in the monotone test
         x = sampler.sample(big, noise.view(m * B, *b["tgt"].shape[1:]), z_keys=keys, z_seed=s)
-        return scaled_to_ndvi(x).view(m, B, *b["tgt"].shape[1:])
+        return spread_scale(scaled_to_ndvi(x).view(m, B, *b["tgt"].shape[1:]), spread)
     return Variant(name, f, True, True)
 
 

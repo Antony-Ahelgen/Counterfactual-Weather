@@ -27,7 +27,7 @@ def _wx_members(wx_list: list[np.ndarray], n: int, shift: int = 0) -> torch.Tens
 
 
 def window_effects(forecast_fn, sample: dict, sb, l: int, yi: int, t0: int, n: int, wx_mean, wx_std, K: int,
-                   seed: int, coupling_delta: float | None = None) -> dict:
+                   seed: int, coupling_delta: float | None = None, spread: float = 1.0) -> dict:
     """forecast_fn(batch, noise, hook) -> scaled x0 [B, H, P, P]. Returns per-member area-mean effects
     and pixel summaries for the drought effect."""
     normal, n_method = sb.normal(l, yi, t0)
@@ -63,6 +63,8 @@ def window_effects(forecast_fn, sample: dict, sb, l: int, yi: int, t0: int, n: i
     keys = torch.cat([torch.arange(n) + (10_000 if k == "Ni" else 0) for k in names])
     x = scaled_to_ndvi(forecast_fn(big, nz, hook, keys, seed))
     xs = {k: x[i * n:(i + 1) * n] for i, k in enumerate(names)}
+    if spread != 1.0 and n > 1:
+        xs = {k: v.mean(0, keepdim=True) + spread * (v - v.mean(0, keepdim=True)) for k, v in xs.items()}
     am = lambda t: t.mean((1, 2, 3)).numpy()  # noqa: E731
     dDN = xs["D"] - xs["N"]
     return {

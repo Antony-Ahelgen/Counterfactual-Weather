@@ -1,0 +1,8 @@
+{
+ "Physics-constrained diffusion is sharper than the deterministic baseline (closer to observed sharpness)": "not supported",
+ "Physics-constrained diffusion is sharper than unconstrained diffusion (closer to observed sharpness)": "no meaningful difference",
+ "Physics constraints make forecasts more physically consistent": "partly supported (learned loss reduces monotone/envelope violations; guided/projected rates are zero by construction and below the observations' own rates = over-constraint)",
+ "Physics-constrained diffusion is more accurate (CRPS) than the baselines": "partly supported",
+ "Drought-attributable vegetation loss can be estimated credibly": "not supported (all informative observation-based checks fail; natural experiment uninformative: fewer than 10 matched pairs or covariate imbalance SMD > 0.25)",
+ "Ensemble uncertainty is calibrated (uncertainty-aware estimates)": "not supported (overconfident: intervals too narrow)"
+}

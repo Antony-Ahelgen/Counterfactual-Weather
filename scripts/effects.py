@@ -80,8 +80,10 @@ def main() -> None:
         for i in range(len(ds)):
             s = ds[i]
             l, y, t0, oy, ox = (int(v) for v in win[i])
+            key = base.replace("+", "_")
+            sp = ctx.spread.get(f"s{a.seed}", {}).get(key, 1.0) if base != "det" else 1.0
             r = window_effects(fn, s, sb, l, y, t0, M, ctx.wx_mean, ctx.wx_std, ctx.K, seed=a.seed * 100000 + i,
-                               coupling_delta=delta)
+                               coupling_delta=delta, spread=sp)
             r.update({"loc": l, "year": ctx.cube.years[y], "t0": t0, "oy": oy, "ox": ox,
                       "drought": float(s["drought"])})
             if len(show) < 6 and r["drought"] == 1.0:

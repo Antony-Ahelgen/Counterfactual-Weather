@@ -62,6 +62,8 @@ class Ctx:
         g_f = RESULTS / ("smoke/" if smoke else "") / "val" / "guidance_choice.json"
         if g_f.exists():   # guidance scale selected on VALIDATION (run_pipeline stage 5)
             self.cfg["physics"]["guidance_scale"] = json.loads(g_f.read_text())["guidance_scale"]
+        s_f = g_f.with_name("spread_choice.json")   # post-hoc spread factors fitted on VALIDATION
+        self.spread = json.loads(s_f.read_text()) if s_f.exists() else {}
         e_f = g_f.with_name("eta_choice.json")
         self.cfg["diffusion"]["eta"] = json.loads(e_f.read_text())["eta"] if e_f.exists() else 0.0
 
@@ -79,7 +81,8 @@ class Ctx:
         o = SamplerOpts(guidance=guidance, guidance_scale=scale if scale is not None else p["guidance_scale"],
                         projection=projection, ddim_steps=self.cfg["diffusion"]["ddim_steps"],
                         lambda_rate=p["lambda_rate"], lambda_phen=p["lambda_phen"], lambda_range=p["lambda_range"],
-                        constraints=cons, eta=self.cfg["diffusion"].get("eta", 0.0) if eta is None else eta)
+                        constraints=cons, eta=self.cfg["diffusion"].get("eta", 0.0) if eta is None else eta,
+                        projection_rate=p.get("projection_rate", True))
         return Sampler(self.model(run), self.diff, self.phys, o)
 
     def variant(self, spec: str):
@@ -99,7 +102,9 @@ class Ctx:
                     scale = float(p[2:])
             elif p == "P":
                 projection = True
-        v = diffusion_variant(self.sampler(run, guidance, projection, scale, eta), spec)
+        key = spec.split("+Ex")[0].replace("+", "_")
+        sp = self.spread.get(f"s{self.seed}", {}).get(key, 1.0) if not getattr(self, "no_spread", False) else 1.0
+        v = diffusion_variant(self.sampler(run, guidance, projection, scale, eta), spec, spread=sp)
         return v
 
 
@@ -123,8 +128,10 @@ def main() -> None:
     ap.add_argument("--n_windows", type=int, default=None)
     ap.add_argument("--smoke", action="store_true", help="real-data test fixture")
     ap.add_argument("--reference", default="diff_phys+G+P", help="variant for paired comparisons")
+    ap.add_argument("--no_spread", action="store_true", help="ignore spread_choice.json (for fitting it)")
     a = ap.parse_args()
     ctx = Ctx(a.preset, a.smoke, a.seed)
+    ctx.no_spread = a.no_spread
     torch.set_num_threads(ctx.cfg["train"].get("threads", 8))
     variants = a.variants or (MAIN_TEST + ABLATION)
     tag = a.tag or f"{a.split}"
@@ -191,7 +198,11 @@ def main() -> None:
                 pt_rows.append({"reference": a.reference, "other": name, "metric": metric, **r, "seed": a.seed})
     for name, rr in [("metrics_ci.csv", ci_rows), ("paired_tests.csv", pt_rows)]:
         if rr:
-            pd.DataFrame(rr).to_csv(out / name, index=False)
+            new = pd.DataFrame(rr)
+            if (out / name).exists():      # keep other seeds' rows
+                old_df = pd.read_csv(out / name)
+                new = pd.concat([old_df[old_df.seed != a.seed], new], ignore_index=True)
+            new.to_csv(out / name, index=False)
             write_provenance(out / name, seed=a.seed, extra={"split": a.split, "bootstrap": "1000 x locations"})
 
 
