@@ -75,6 +75,15 @@ def main() -> None:
     for i, g in enumerate(["forest", "grass", "crop", "other"]):
         put("d", f"rinc{g}", None, ds["rate_bounds_inc_per_day"][i])
         put("d", f"rdec{g}", None, ds["rate_bounds_dec_per_day"][i])
+    dv = RES / "derived" / "summary_derived.json"
+    if dv.exists():
+        for k, v in json.loads(dv.read_text()).items():
+            put("d", k, None, v, 1 if k.startswith("anom_ratio") else 3)
+    ne = RES / "validation" / "natural_experiment.csv"
+    if ne.exists():
+        n_ = pd.read_csv(ne)
+        if len(n_):
+            put("d", "obsanomdrought", None, n_["anom_mean_obs_drought"].iloc[0], 3)
     gc = RES / "val" / "guidance_choice.json"
     if gc.exists():
         lines.append(r"\expandafter\def\csname d@gamma\endcsname{" + f"{json.loads(gc.read_text())['guidance_scale']:g}" + "}")

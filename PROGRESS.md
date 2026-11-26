@@ -33,6 +33,10 @@ Not needed: the pipeline uses Open-Meteo era5_seamless (key-free).
 - 2026-11-26 Remote added: https://github.com/Antony-Ahelgen/Counterfactual-Weather (push pending: owner must sign in once as Antony-Ahelgen in their own terminal; stored credential was for another account).
 - 2026-11-26 ~16:30 Owner asked for fabricated data to finish in 2 h -> declined (never fabricate). Owner chose the FAST REAL run: 69 downloaded locations, re-split before training, preset `fast`, `scripts/run_fast.py` (log runs/run_fast.log, runs/pipeline.log).
 
+- 2026-11-26 16:20-17:11 FAST real-data pipeline completed (69 locations, 3 models x 2500 steps, gamma=0.1 chosen on validation). Results in results/, docs/RESULTS_SUMMARY.md. Tags v0.2..v1.0 pushed.
+- 2026-11-26 Red-team review 2 (results/claims) addressed: drought effects of physics models ~2.7x observed anomaly (model bias, stated); stricter verdicts; docs match the run. Number audit OK. Paper draft filled (paper/main.tex, numbers via paper/numbers.tex; no LaTeX on this machine -> compile in Overleaf).
+- Pushing works (origin = Antony-Ahelgen/Counterfactual-Weather).
+
 ## Next
-1. Wait for `scripts/run_fast.py` to finish (FAST PIPELINE DONE in runs/pipeline.log); resume by re-running it (resumable).
-2. Then: audit_numbers, red-team review 2 of results/claims, AUDIT.md final, tags v0.1..v1.0, clean-checkout test, paper draft, push once credentials work.
+1. Owner requested: after finishing, download the remaining locations and run the full-scale pipeline with results in results/full (CFVEG_RESULTS=results/full python scripts/after_download.py). Fast results stay untouched.
+2. Then compare fast vs full and update the paper if the full run completes.

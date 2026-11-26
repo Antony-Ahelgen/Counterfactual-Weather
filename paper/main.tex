@@ -24,8 +24,12 @@ using common random numbers. Physical plausibility (growth/decline rate bounds, 
 monotone response to moisture stress) is imposed as auxiliary losses, sampling guidance and a final projection.
 Because the counterfactual is unobservable, we evaluate with a five-part framework: proxy back-tests, a matched
 natural experiment, placebo checks, calibration and constraint-violation rates. On \D{nloc} European locations
-(2017--2023) in a reduced-scale CPU study, \draftnote{one-sentence summary of the main findings, to be written from
-docs/RESULTS\_SUMMARY.md}.
+(2017--2023) in a reduced-scale CPU study, diffusion ensembles outperform persistence, climatology and a
+deterministic network in CRPS, and the learned physics losses reduce monotonicity and envelope violations; however,
+the constraints slightly reduce accuracy relative to unconstrained diffusion, the ensembles are overconfident, and the
+estimated drought effects of the physics models are about \D{anom_ratio_diff_phys_G_P} times larger than the observed
+drought anomaly. Observation-based validation therefore does \emph{not} support the drought-effect estimates in this
+setting, a negative result that our framework makes visible.
 \end{abstract}
 
 \section{Introduction}
@@ -100,18 +104,49 @@ locations and years. The physics-constrained model reaches a CRPS of \R{diff_phy
 \R{diff_phys_G_P}{crpslo}--\R{diff_phys_G_P}{crpshi}) versus \R{diff_plain}{crps} for diffusion without physics and
 \R{det}{crps} for the deterministic network. Its sharpness ratios (prediction/observation) are
 \R{diff_phys_G_P}{grad_ratio} (gradient) and \R{diff_phys_G_P}{hf_ratio} (high-frequency power), compared with
-\R{det}{grad_ratio} and \R{det}{hf_ratio} for the deterministic network. \draftnote{Interpretation after results.}
+\R{det}{grad_ratio} and \R{det}{hf_ratio} for the deterministic network. All diffusion variants beat every baseline
+in CRPS; part of this advantage over point forecasts follows from being an ensemble (the CRPS of a single forecast
+equals its MAE), and on MAE the deterministic network (\R{det}{mae}) is better than the physics-constrained ensemble
+mean (\R{diff_phys_G_P}{mae}). The physics constraints cost accuracy: the constrained model's CRPS is higher than that
+of unconstrained diffusion by \R{diffdiff_plain}{crps} (95\,\% CI \R{diffdiff_plain}{crpslo} to
+\R{diffdiff_plain}{crpshi}). Diffusion samples are noisier than the observations (ratios above 1) whereas the
+deterministic network is blurry (ratios below 1); neither is closer to the observed sharpness in a meaningful way.
 
 \input{../results/tables/ablation.tex}
 \paragraph{Physical consistency.} The observations themselves violate the phenology envelope in a fraction
 \R{observed}{phen_frac} of valid pixel-timesteps and the rate bounds in \R{observed}{rate_frac}. Diffusion without
 physics violates the envelope in \R{diff_plain}{phen_frac}, the loss-only physics model in \R{diff_phys}{phen_frac},
 and the full model in \R{diff_phys_G_P}{phen_frac}; monotone-response violations are \R{diff_plain}{mono_frac},
-\R{diff_phys}{mono_frac} and \R{diff_phys_G_P}{mono_frac}. \draftnote{Interpretation after results.}
+\R{diff_phys}{mono_frac} and \R{diff_phys_G_P}{mono_frac}. The learned losses alone therefore reduce violations
+(the loss-only model matches the observations' own envelope violation rate), and guidance with projection removes
+them almost entirely. Zero violations under guidance and projection hold by construction and fall below the
+observations' own rates, which indicates over-constraint rather than additional physical realism; the monotone metric
+uses the same stress perturbation as the training loss and is thus in-sample.
 
 \section{Validation of drought-effect estimates}
 \input{../results/tables/validation.tex}
-\draftnote{Results of the five validation parts; numbers via macros from results/validation.}
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{fig_validation.pdf}
+\caption{Left: distribution of estimated effects (observed-weather minus normal-scenario forecast) for drought and
+non-drought test windows, with the scenario placebo. Right: matched natural experiment (model effect vs.\ observed
+difference-in-differences); only \V{diff_phys_G_P}{n_matched} treated windows could be matched.}
+\label{fig:validation}\end{figure}
+\paragraph{Observation-based checks.} On drought-labelled test windows the observed NDVI anomaly relative to
+non-drought years at the same place and season is \D{obsanomdrought}. The physics-constrained model's anomaly is
+\D{anom_ratio_diff_phys_G_P} times larger, unconstrained diffusion's \D{anom_ratio_diff_plain} times and the
+deterministic network's \D{anom_ratio_det} times. Across windows, the model anomaly correlates only weakly with the
+observed anomaly (\V{diff_phys_G_P}{anom_corr}, 95\,\% CI \V{diff_phys_G_P}{anom_corr_lo95} to
+\V{diff_phys_G_P}{anom_corr_hi95}). In the cross-year proxy, the normal-scenario forecast change on drought windows
+(MAE \V{diff_phys_G_P}{mae_normalD}) is further from the observed change in non-drought years than persistence
+(\V{diff_phys_G_P}{mae_persistenceD}) and climatology (\V{diff_phys_G_P}{mae_climatologyD}). The natural
+experiment is uninformative: only \V{diff_phys_G_P}{n_matched} pairs could be matched, with covariate imbalance
+(maximum standardised mean difference \V{diff_phys_G_P}{max_abs_smd}).
+\paragraph{Sanity checks.} Placebos behave as expected (two different normal-analog assignments give a mean effect of
+\V{diff_phys_G_P}{scenario_placebo_mean}), and common random numbers reduce the variance of $\Delta$ to a fraction
+\V{diff_phys_G_P}{crn_var_ratio} of the independent-noise variance. These checks rely on model inputs only and cannot
+establish credibility.
+\paragraph{Calibration.} Ensembles are overconfident: the central 90\,\% interval covers \R{diff_phys_G_P}{cov90}
+of observations and the spread--skill ratio is \R{diff_phys_G_P}{spread_skill}.
 
 \section{Limitations}
 The drought effect is a model-based estimate, credible only if the model captures how weather drives vegetation and no
@@ -121,7 +156,13 @@ locations are wide. The semi-synthetic oracle was not run (real data only), and 
 and the loss-weight sweep were not run. See \texttt{docs/LIMITATIONS.md}.
 
 \section{Conclusion}
-\draftnote{Written from the claim check in docs/RESULTS\_SUMMARY.md.}
+Physics-constrained diffusion produced sharp, probabilistic NDVI forecasts that beat classical baselines in CRPS, and
+its learned constraint losses reduced physically implausible behaviour. The central hypothesis of credible
+drought-attributable loss estimates was not supported in this reduced-scale study: the constrained models attribute
+markedly larger drought losses than observed, and observation-based checks fail. The validation framework, in
+particular the observation-based anomaly and proxy checks, was essential to detect this; input-based placebos alone
+would have suggested success. Larger training sets, multiple seeds, better-calibrated ensembles and constraints
+calibrated against observed rather than idealised responses are the most important next steps.
 
 \paragraph{Data and code availability.} Contains modified Copernicus Sentinel data (2017--2023) and modified
 Copernicus Climate Change Service information. Weather data by Open-Meteo.com (CC BY 4.0). Produced using Copernicus
