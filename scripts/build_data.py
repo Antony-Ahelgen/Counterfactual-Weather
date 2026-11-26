@@ -18,6 +18,10 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
+# results root: env CFVEG_RESULTS (e.g. results/full for the full-scale run), default results/
+RESULTS = Path(__import__("os").environ.get("CFVEG_RESULTS", str(ROOT / "results")))
+if not RESULTS.is_absolute():
+    RESULTS = ROOT / RESULTS
 sys.path.insert(0, str(ROOT / "src"))
 
 from cfveg.data.cube import build_cube  # noqa: E402
@@ -97,7 +101,7 @@ def main() -> None:
         import shutil
 
         shutil.copytree(ROOT / "tests" / "fixtures" / "real_cube", pdir / "cube", dirs_exist_ok=True)
-        res_dir = ROOT / "results" / "smoke"
+        res_dir = RESULTS / "smoke"
     else:
         if a.download:
             for st in ["locations", "weather", "s2"]:
@@ -105,7 +109,7 @@ def main() -> None:
                                 "--preset", a.preset], check=True)
         meta = build_cube(cfg, ROOT)
         print(f"cube: {len(meta['loc_id'])} locations; dropped {len(meta['dropped'])}", flush=True)
-        res_dir = ROOT / "results" / "data"
+        res_dir = RESULTS / "data"
     cube = Cube.load(pdir / "cube")
     stats = fit_norm_stats(cube, cfg)
     (pdir / "stats.json").write_text(json.dumps(stats, indent=1))

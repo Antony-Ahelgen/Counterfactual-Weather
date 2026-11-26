@@ -15,6 +15,10 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
+# results root: env CFVEG_RESULTS (e.g. results/full for the full-scale run), default results/
+RESULTS = Path(__import__("os").environ.get("CFVEG_RESULTS", str(ROOT / "results")))
+if not RESULTS.is_absolute():
+    RESULTS = ROOT / RESULTS
 sys.path.insert(0, str(ROOT / "src"))
 
 from cfveg.utils import plotting  # noqa: E402
@@ -57,7 +61,7 @@ def main() -> None:
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--seed", type=int, default=0)
     a = ap.parse_args()
-    base = ROOT / "results" / ("smoke" if a.smoke else "")
+    base = RESULTS / ("smoke" if a.smoke else "")
     tdir, fdir = base / "tables", base / "figures"
     tdir.mkdir(parents=True, exist_ok=True)
     fdir.mkdir(parents=True, exist_ok=True)

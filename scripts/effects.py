@@ -16,6 +16,10 @@ import numpy as np
 import torch
 
 ROOT = Path(__file__).resolve().parents[1]
+# results root: env CFVEG_RESULTS (e.g. results/full for the full-scale run), default results/
+RESULTS = Path(__import__("os").environ.get("CFVEG_RESULTS", str(ROOT / "results")))
+if not RESULTS.is_absolute():
+    RESULTS = ROOT / RESULTS
 sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "src"))
 
@@ -59,7 +63,7 @@ def main() -> None:
     win = effect_windows(ctx, a.split, a.t0_stride, a.max_windows, a.seed)
     ds = WindowDataset(ctx.cube, ctx.cfg, win, ctx.stats)
     sb = ScenarioBuilder(ctx.cube, ctx.cfg)
-    out = ROOT / "results" / ("smoke/" if a.smoke else "") / ("effects" if a.split == "test" else f"effects_{a.split}")
+    out = RESULTS / ("smoke/" if a.smoke else "") / ("effects" if a.split == "test" else f"effects_{a.split}")
     out.mkdir(parents=True, exist_ok=True)
     print(f"{len(win)} windows, {M} members", flush=True)
     for spec in a.variants:

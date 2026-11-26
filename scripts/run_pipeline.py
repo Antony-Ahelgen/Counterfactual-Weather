@@ -30,11 +30,15 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
+# results root: env CFVEG_RESULTS (e.g. results/full for the full-scale run), default results/
+RESULTS = Path(__import__("os").environ.get("CFVEG_RESULTS", str(ROOT / "results")))
+if not RESULTS.is_absolute():
+    RESULTS = ROOT / RESULTS
 PY = sys.executable
 LAMBDAS = [0.3, 1.0, 3.0]
 SMOKE: list[str] = []          # ["--smoke"] when testing the orchestrator on the real-data fixture
 RUNS_SUFFIX = ""
-RES = ROOT / "results"
+RES = RESULTS
 GAMMAS = [0.003, 0.01, 0.03, 0.1]
 
 
@@ -117,7 +121,7 @@ def main() -> None:
     a = ap.parse_args()
     global SMOKE, RUNS_SUFFIX, RES
     if a.smoke:
-        SMOKE, RUNS_SUFFIX, RES = ["--smoke"], "_smoke", ROOT / "results" / "smoke"
+        SMOKE, RUNS_SUFFIX, RES = ["--smoke"], "_smoke", RESULTS / "smoke"
     p = a.preset
     (ROOT / "runs").mkdir(exist_ok=True)
     thr = max(2, 14 // a.parallel)
@@ -171,6 +175,8 @@ def main() -> None:
             ROOT / "runs" / "effects.log")
     run(["scripts/validate.py", "--preset", p, *SMOKE], ROOT / "runs" / "validate.log")
     run(["scripts/counterfactual_demo.py", "--preset", p, *SMOKE], ROOT / "runs" / "demo.log")
+    run(["scripts/paper_assets.py", *SMOKE], ROOT / "runs" / "paper_assets.log")
+    run(["scripts/render_summary.py", *SMOKE], ROOT / "runs" / "render_summary.log")
     log("PIPELINE DONE")
 
 

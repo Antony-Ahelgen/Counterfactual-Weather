@@ -20,6 +20,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+# results root: env CFVEG_RESULTS (e.g. results/full for the full-scale run), default results/
+RESULTS = Path(__import__("os").environ.get("CFVEG_RESULTS", str(ROOT / "results")))
+if not RESULTS.is_absolute():
+    RESULTS = ROOT / RESULTS
 sys.path.insert(0, str(ROOT / "src"))
 
 from cfveg.data.dataset import Cube  # noqa: E402
@@ -63,7 +67,7 @@ def main() -> None:
     cfg = load_preset(a.preset)
     if a.threads:
         cfg["train"]["threads"] = a.threads
-    lam_f = ROOT / "results" / ("smoke/" if a.smoke else "") / "val" / "lambda_choice.json"
+    lam_f = RESULTS / ("smoke/" if a.smoke else "") / "val" / "lambda_choice.json"
     lam_scale = json.loads(lam_f.read_text())["lambda_scale"] if lam_f.exists() else 1.0
     pdir = ROOT / ("data/smoke" if a.smoke else cfg["data"]["processed_dir"])
     cube = Cube.load(pdir / "cube")

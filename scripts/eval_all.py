@@ -24,6 +24,10 @@ import pandas as pd
 import torch
 
 ROOT = Path(__file__).resolve().parents[1]
+# results root: env CFVEG_RESULTS (e.g. results/full for the full-scale run), default results/
+RESULTS = Path(__import__("os").environ.get("CFVEG_RESULTS", str(ROOT / "results")))
+if not RESULTS.is_absolute():
+    RESULTS = ROOT / RESULTS
 sys.path.insert(0, str(ROOT / "src"))
 
 from cfveg.counterfactual.paired import Sampler, SamplerOpts  # noqa: E402
@@ -55,7 +59,7 @@ class Ctx:
         self.wx_mean = torch.tensor(self.stats["wx_mean"])
         self.wx_std = torch.tensor(self.stats["wx_std"])
         self.runs = ROOT / "runs" / (preset + ("_smoke" if smoke else ""))
-        g_f = ROOT / "results" / ("smoke/" if smoke else "") / "val" / "guidance_choice.json"
+        g_f = RESULTS / ("smoke/" if smoke else "") / "val" / "guidance_choice.json"
         if g_f.exists():   # guidance scale selected on VALIDATION (run_pipeline stage 5)
             self.cfg["physics"]["guidance_scale"] = json.loads(g_f.read_text())["guidance_scale"]
 
@@ -119,7 +123,7 @@ def main() -> None:
     torch.set_num_threads(ctx.cfg["train"].get("threads", 8))
     variants = a.variants or (MAIN_TEST + ABLATION)
     tag = a.tag or f"{a.split}"
-    out = ROOT / "results" / (("smoke/" if a.smoke else "") + tag)
+    out = RESULTS / (("smoke/" if a.smoke else "") + tag)
     out.mkdir(parents=True, exist_ok=True)
     nw = a.n_windows or ctx.cfg["eval"]["n_eval_windows"]
     M = a.members or ctx.cfg["eval"]["n_members"]

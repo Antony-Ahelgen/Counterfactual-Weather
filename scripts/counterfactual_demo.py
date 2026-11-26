@@ -17,6 +17,10 @@ import numpy as np
 import torch
 
 ROOT = Path(__file__).resolve().parents[1]
+# results root: env CFVEG_RESULTS (e.g. results/full for the full-scale run), default results/
+RESULTS = Path(__import__("os").environ.get("CFVEG_RESULTS", str(ROOT / "results")))
+if not RESULTS.is_absolute():
+    RESULTS = ROOT / RESULTS
 sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "src"))
 
@@ -58,7 +62,7 @@ def main() -> None:
     r_ind = estimate_effect(sampler, s, normal, drought, M, ctx.wx_mean, ctx.wx_std, ctx.K, crn=False, seed=a.seed)
     sm = summarize_delta(r["delta"])
     sm_ind = summarize_delta(r_ind["delta"])
-    out = ROOT / "results" / ("smoke/" if a.smoke else "") / "counterfactual"
+    out = RESULTS / ("smoke/" if a.smoke else "") / "counterfactual"
     out.mkdir(parents=True, exist_ok=True)
     res = {
         "variant": a.variant, "members": M, "loc_id": ctx.cube.meta["loc_id"][l], "year": ctx.cube.years[yi],
