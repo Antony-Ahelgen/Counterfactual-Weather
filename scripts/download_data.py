@@ -60,13 +60,15 @@ def _s2_job(loc_id: str, lon: float, lat: float, cfg: dict, threads: int) -> dic
     r = download_location(lon, lat, cfg, n_workers=threads)
     tmp = out.with_suffix(".tmp.npz")
     np.savez_compressed(tmp, ndvi=r["ndvi"].astype(np.float16), nobs=r["nobs"],
-                        years=np.array(cfg["data"]["years"]), lenient_years=np.array(r["lenient_years"]))
+                        years=np.array(cfg["data"]["years"]), lenient_years=np.array(r["lenient_years"]),
+                        failed_days=np.array(r["failed_days"]))
     tmp.replace(out)
     man = pd.DataFrame(r["manifest"])
     man.insert(0, "loc_id", loc_id)
     man.to_csv(out.with_suffix(".scenes.csv"), index=False)
     return {"loc_id": loc_id, "secs": round(time.time() - t), "n_scenes": len(man),
-            "valid_frac": float(np.isfinite(r["ndvi"]).mean()), "lenient_years": r["lenient_years"]}
+            "valid_frac": float(np.isfinite(r["ndvi"]).mean()), "lenient_years": r["lenient_years"],
+            "n_failed_days": len(r["failed_days"])}
 
 
 def stage_locations(cfg: dict, workers: int) -> None:
