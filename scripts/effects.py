@@ -26,6 +26,7 @@ from cfveg.counterfactual.effects import (det_forecast_fn, effects_table, sample
 from cfveg.data.dataset import WindowDataset, make_windows  # noqa: E402
 from cfveg.data.scenarios import ScenarioBuilder  # noqa: E402
 from cfveg.utils.provenance import write_provenance  # noqa: E402
+from cfveg.validation.framework import cross_year_proxy  # noqa: E402
 
 
 def effect_windows(ctx: Ctx, split: str, t0_stride: int, max_windows: int, seed: int = 0) -> np.ndarray:
@@ -82,6 +83,13 @@ def main() -> None:
             if len(show) < 6 and r["drought"] == 1.0:
                 show[f"w{i}"] = {"xN": r["xN"], "xD": r["xD"], "xO": r["xO"], "obs_ctx": s["ctx"].numpy(),
                                  "tgt": s["tgt"].numpy(), "tgt_mask": s["tgt_mask"].numpy(), "idx": win[i]}
+            last = s["last_ndvi"].numpy()[None]
+            K_, H_, P_ = ctx.K, ctx.H, s["tgt"].shape[-1]
+            clim = ctx.clim[l, :, oy:oy + P_, ox:ox + P_]
+            fc = {"normal": r["xN"].mean(0) - last, "factual": r["xO"].mean(0) - last,
+                  "persistence": np.zeros_like(r["xN"][0]),
+                  "climatology": clim[t0 + K_:t0 + K_ + H_] - clim[t0 + K_ - 1][None]}
+            r.update(cross_year_proxy(ctx.cube, ctx.cfg, l, y, t0, oy, ox, fc))
             for k in ["xN", "xD", "xO"]:
                 r.pop(k)
             recs.append(r)
