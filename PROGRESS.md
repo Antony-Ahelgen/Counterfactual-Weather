@@ -37,6 +37,9 @@ Not needed: the pipeline uses Open-Meteo era5_seamless (key-free).
 - 2026-11-26 Red-team review 2 (results/claims) addressed: drought effects of physics models ~2.7x observed anomaly (model bias, stated); stricter verdicts; docs match the run. Number audit OK. Paper draft filled (paper/main.tex, numbers via paper/numbers.tex; no LaTeX on this machine -> compile in Overleaf).
 - Pushing works (origin = Antony-Ahelgen/Counterfactual-Weather).
 
-## Next
-1. Owner requested: after finishing, download the remaining locations and run the full-scale pipeline with results in results/full (CFVEG_RESULTS=results/full python scripts/after_download.py). Fast results stay untouched.
-2. Then compare fast vs full and update the paper if the full run completes.
+- 2026-11-26 17:20-18:15 extra download to 80 locations; 18:15-19:35 medium run; 18:55-20:05 lambda sweep (x3), gamma 0.1, eta 0 on validation; tuned test evaluated once. 20:10 tuned run promoted to results/ (fast archived in results/archive_fast69, untuned medium in results/medium). Paper/docs updated; audit OK.
+
+## Next (optional, if more time)
+1. Full run on all 160 locations (download remaining ~80, then `CFVEG_RESULTS=results/full python scripts/after_download.py`).
+2. Multiple seeds; larger ensembles; per-constraint retraining ablations; finer guidance grid beyond 0.1.
+3. Authors: verify refs.bib, port paper to the Springer LNEE template, add related work on causal attribution.

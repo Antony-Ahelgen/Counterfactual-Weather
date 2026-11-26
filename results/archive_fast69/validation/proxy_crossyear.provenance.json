@@ -1,0 +1,11 @@
+{
+  "result_file": "proxy_crossyear.csv",
+  "command": "python.exe scripts/validate.py --preset fast",
+  "git_commit": "47b97635235548c858fd74ac1d427778bbe5db5f",
+  "seed": null,
+  "config": null,
+  "timestamp": "2026-11-26T17:09:52",
+  "python": "3.14.2",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "part": "1b"
+}

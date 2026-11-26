@@ -1,13 +1,13 @@
 {
   "result_file": "effects_diff_phys_G_P_s0.csv",
-  "command": "python.exe scripts/effects.py --preset fast --members 8 --max_windows 80",
-  "git_commit": "47b97635235548c858fd74ac1d427778bbe5db5f",
+  "command": "python.exe scripts/effects.py --preset medium_tuned --members 8 --max_windows 100",
+  "git_commit": "a19d971e59c0bbdcf498c40955d15534fbe80937",
   "seed": 0,
   "config": {
     "data": {
       "root": "data",
       "raw_dir": "data/raw",
-      "processed_dir": "data/processed_fast",
+      "processed_dir": "data/processed_medium",
       "region_bbox": [
         -2.0,
         44.0,
@@ -45,7 +45,7 @@
         2023
       ],
       "weather_model": "era5_seamless",
-      "locations_file": "manifests/locations_fast.csv"
+      "locations_file": "manifests/locations_medium.csv"
     },
     "splits": {
       "train_years": [
@@ -102,12 +102,13 @@
       "schedule": "cosine",
       "prediction": "v",
       "ddim_steps": 25,
-      "ema_decay": 0.999
+      "ema_decay": 0.999,
+      "eta": 0.0
     },
     "train": {
       "batch_size": 32,
       "lr": 0.0002,
-      "steps": 2500,
+      "steps": 3000,
       "grad_clip": 1.0,
       "log_every": 100,
       "ckpt_every": 500,
@@ -137,14 +138,14 @@
     },
     "eval": {
       "n_members": 8,
-      "n_eval_windows": 100,
+      "n_eval_windows": 120,
       "seeds": [
         0
       ]
     },
-    "preset": "fast"
+    "preset": "medium_tuned"
   },
-  "timestamp": "2026-11-26T17:00:42",
+  "timestamp": "2026-11-26T19:53:54",
   "python": "3.14.2",
   "platform": "Windows-11-10.0.26200-SP0",
   "variant": "diff_phys+G+P",

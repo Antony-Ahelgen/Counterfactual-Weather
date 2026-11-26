@@ -1,0 +1,9 @@
+{
+ "sharpness_closeness_diff_phys_G_P": 0.9620812551568071,
+ "sharpness_closeness_det": 0.9432121798769084,
+ "sharpness_closeness_diff_plain": 1.00968440830788,
+ "anom_ratio_diff_phys_G_P": 2.661064139812899,
+ "anom_ratio_diff_phys": 2.456942363280676,
+ "anom_ratio_diff_plain": 1.7168656654038599,
+ "anom_ratio_det": 0.960638645995099
+}

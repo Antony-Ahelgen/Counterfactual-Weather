@@ -34,7 +34,8 @@ deterministic network has the lowest MAE (\R{det}{mae} vs.\ \R{diff_phys_G_P}{ma
 but the constraints slightly reduce accuracy relative to unconstrained diffusion, the ensembles are overconfident,
 and the estimated drought effects of the physics models are about \D{anom_ratio_diff_phys_G_P} times larger than the
 observed drought anomaly. Observation-based validation therefore does \emph{not} support the drought-effect estimates
-in this setting. With only \D{nloctest} test locations and \D{neffdrought} drought-labelled test windows at
+in this setting. Selecting the physics-loss weights and the sampling stochasticity on validation data did not
+remove these weaknesses. With only \D{nloctest} test locations and \D{neffdrought} drought-labelled test windows at
 \D{neffdroughtloc} locations, no conclusion about drought effects is solid yet.
 \end{abstract}
 
@@ -66,8 +67,9 @@ SPEI-like multivariate stress index from ERA5/ERA5-Land reanalysis~\cite{hersbac
 models, with verified references only.}
 
 \section{Data}
-We sampled \D{nloc} locations in Central and Western Europe (at least 0.3$^\circ$ apart, at least 60\,\% vegetated
-according to ESA WorldCover~\cite{zanaga2022worldcover}) and built 64$\times$64-pixel, 20\,m patches of Sentinel-2
+We sampled 160 locations in Central and Western Europe (at least 0.3$^\circ$ apart, at least 60\,\% vegetated
+according to ESA WorldCover~\cite{zanaga2022worldcover}); because of the compute and time budget, the \D{nloc}
+locations whose downloads had completed by a fixed cut-off were used and built 64$\times$64-pixel, 20\,m patches of Sentinel-2
 L2A NDVI for March--October 2017--2023 as per-pixel median composites in 5-day bins, masking clouds, shadows and snow
 with the scene classification layer and correcting the processing-baseline reflectance offset. Daily weather
 (precipitation, temperature, dewpoint, vapour pressure deficit, radiation, top-layer soil moisture, reference
@@ -95,7 +97,8 @@ climatology of non-drought training years, and above $\mu-2\sigma$ under the nor
 \emph{Monotonicity}: for the same noisy input, a drier and hotter weather sequence must not yield higher NDVI. The
 constraints enter training as SNR-weighted auxiliary losses on the predicted clean sample, sampling as energy guidance
 with a scale chosen on validation data ($\gamma=\D{gamma}$), and a final projection onto the NDVI range and rate
-bounds.
+bounds. The loss weights were scaled by a factor selected on validation data from $\{0.3, 1, 3\}$, and sampling is
+deterministic DDIM after stochastic DDIM ($\eta\in\{0.5,1\}$) failed to improve validation calibration.
 
 \paragraph{Counterfactual estimation.} For an initial scene, the horizon weather is replaced by a \emph{normal}
 scenario (an ensemble of near-typical analog training years at the same location) or a \emph{drought} scenario
@@ -158,22 +161,24 @@ of observations and the spread--skill ratio is \R{diff_phys_G_P}{spread_skill}.
 The drought effect is a model-based estimate, credible only if the model captures how weather drives vegetation and no
 unobserved factor drives both. Weather is coarse (9--31\,km) relative to 20\,m imagery. This is a reduced-scale CPU
 study: \D{nloc} locations, short training, one seed and small ensembles; confidence intervals over \D{nloctest} test
-locations are wide. The physics-loss weights $\lambda$ were not tuned (configuration defaults
-$\lambda_{\text{rate}}{=}1$, $\lambda_{\text{phen}}{=}0.5$, $\lambda_{\text{mono}}{=}1$), and the guidance scale
-$\gamma=\D{gamma}$ was the largest value of the searched grid. The semi-synthetic oracle was not run (real data only), and per-constraint retraining ablations
-and the loss-weight sweep were not run. See \texttt{docs/LIMITATIONS.md}.
+locations are wide. The physics-loss weight scale was selected on validation from only three values, and the guidance scale
+$\gamma=\D{gamma}$ was the largest value of the searched grid. A smaller run (69 locations) and an untuned run on the
+same data are reported in the repository; they agree in direction but differ in the size of the drought-effect
+bias. The semi-synthetic oracle was not run (real data only), and per-constraint retraining ablations were not run. See \texttt{docs/LIMITATIONS.md}.
 
 \section{Conclusion}
 Physics-constrained diffusion produced sharp, probabilistic NDVI forecasts that beat classical baselines in CRPS, and
 its learned constraint losses reduced physically implausible behaviour. The central hypothesis of credible
 drought-attributable loss estimates was not supported in this reduced-scale study: the constrained models attribute
-markedly larger drought losses than observed, and observation-based checks fail. The validation framework, in
+larger drought losses than observed (by a factor that differed between our runs), and observation-based
+checks fail. The validation framework, in
 particular the observation-based anomaly and proxy checks, was essential to detect this; input-based placebos alone
 would have suggested success. Larger training sets, multiple seeds, better-calibrated ensembles and constraints
 calibrated against observed rather than idealised responses are the most important next steps. The sample
-(\D{nloctest} test locations, \D{neffdrought} drought-labelled test windows) is too small for firm conclusions; the
-physics weights $\lambda$ were not tuned (configuration defaults), and the selected guidance scale lies at the edge of
-the searched grid, so its optimum was not identified.
+(\D{nloctest} test locations, \D{neffdrought} drought-labelled test windows) is too small for firm conclusions; selecting
+the physics weights and the sampling stochasticity on validation data traded accuracy for fewer violations without
+improving calibration, and the selected guidance scale lies at the edge of the searched grid, so its optimum was not
+identified.
 
 \paragraph{Data and code availability.} Contains modified Copernicus Sentinel data (2017--2023) and modified
 Copernicus Climate Change Service information. Weather data by Open-Meteo.com (CC BY 4.0). Produced using Copernicus

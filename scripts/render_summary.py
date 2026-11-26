@@ -78,7 +78,13 @@ def main() -> None:
         g = gch.get("guidance_scale")
         edge = (" - the largest value of the grid, so the optimum was not identified"
                 if g is not None and g == max(gch.get("candidates", [g])) else "")
-        L.append(f"- {lam_txt}; guidance scale {g} selected on validation from {gch.get('candidates')}{edge}. "
+        eta_f = base / "val" / "eta_choice.json"
+        eta_txt = ""
+        if eta_f.exists():
+            ec = json.loads(eta_f.read_text())
+            eta_txt = (f"; DDIM eta {ec['eta']} selected on validation from {ec['candidates']} "
+                       f"(calibration fix{' did not help: stochastic sampling lowered validation coverage' if ec['eta'] == 0 else ''})")
+        L.append(f"- {lam_txt}; guidance scale {g} selected on validation from {gch.get('candidates')}{edge}{eta_txt}. "
                  f"Source: results/val/*.json")
     prov = base / "test" / "metrics.provenance.json"
     preset = json.loads(prov.read_text()).get("config", {}).get("preset", "?") if prov.exists() else "?"

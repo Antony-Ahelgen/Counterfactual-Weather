@@ -13,11 +13,11 @@
  "drought_method": "observed",
  "horizon_stress_drought": 4.247283458709717,
  "horizon_stress_normal_mean": -0.39169134696324664,
- "area_mean_delta_crn": -0.2781301736831665,
- "frac_sig_loss_crn": 0.9991455078125,
- "member_area_delta_sd_crn": 0.02291584014892578,
- "member_area_delta_sd_independent": 0.04152849689126015,
- "pixel_delta_var_crn": 0.006118554621934891,
- "pixel_delta_var_independent": 0.032286640256643295,
- "crn_variance_ratio_pixel": 0.18950731860915562
+ "area_mean_delta_crn": -0.2722705006599426,
+ "frac_sig_loss_crn": 0.9996337890625,
+ "member_area_delta_sd_crn": 0.016577651724219322,
+ "member_area_delta_sd_independent": 0.03542282432317734,
+ "pixel_delta_var_crn": 0.004000892862677574,
+ "pixel_delta_var_independent": 0.029755378141999245,
+ "crn_variance_ratio_pixel": 0.13445948640223723
 }

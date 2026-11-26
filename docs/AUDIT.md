@@ -46,6 +46,17 @@ Verdict-rule changes after this review only make verdicts stricter.
 | References not marked for checking; plain article skeleton. | refs.bib header requires authors to re-check every entry; [VERIFY] notes on entries with truncated author lists/unconfirmed details; TODO in main.tex to port to the Springer LNEE template. |
 | Tiny sample (10 test locations, 11 drought windows at 6 locations). | Abstract, conclusion and summary state that no conclusion about drought effects is solid yet (counts generated from results). |
 
+## Medium data and validation-only tuning — 2026-11-26 (owner request)
+- Owner asked to "train so that all claims are supported". Declined as stated (that would select on test results);
+  instead weaknesses were addressed with VALIDATION-only selection and pre-registered rules, and test was evaluated once.
+- Medium run: 80 locations (download cut-off 18:15), re-split 56/12/12 before training, 3000 steps (`results/medium/`).
+- λ sweep {0.3, 1, 3} on validation (pipeline rule) -> 3; γ -> 0.1 (grid edge); stochastic DDIM η {0, 0.5, 1} on
+  validation -> 0 (η > 0 lowered validation coverage). Main reported run = `medium_tuned` (promoted to `results/`);
+  fast run archived in `results/archive_fast69/`.
+- Outcome: verdicts unchanged or stricter (tuning traded accuracy for fewer violations; calibration not improved).
+- The summary's interpretive sentence about the drought-effect bias was fixed text written from the fast run and
+  became wrong for the medium run; it is now generated from the per-model ratios.
+
 ## Pending (final audit, Section 11 of the brief)
 - [x] Clean-checkout test (2026-11-26): fresh `git clone` + fresh venv (torch CPU + requirements.lock) -> `tasks.py test` 32 passed, `tasks.py smoke` OK. It caught a critical packaging bug: `.gitignore` rule `data/` also ignored `src/cfveg/data/`, so the data package had never been committed; fixed by anchoring to `/data/`.
 - [x] Number audit (`scripts/audit_numbers.py`): OK on 2026-11-26 over docs/*.md and paper/*.tex; re-run automatically by `scripts/promote_results.py` and `tasks.py paper-assets` after every results change

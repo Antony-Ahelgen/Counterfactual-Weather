@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\caption{Held-out test locations in test years (2021, 2022). MAE/CRPS in NDVI; ratios are prediction/observation (1 = as sharp as observed); violation rates are fractions of pixel-timesteps.}
+\label{tab:main}
+\scriptsize
+\begin{tabular}{lrrrrrrrr}
+\hline
+Model & MAE [95\% CI] & CRPS [95\% CI] & SSIM & Grad. ratio & HF ratio & Rate viol. & Env. viol. & Mono. viol. \\
+\hline
+Persistence & 0.125 [0.105, 0.147] & 0.125 [0.105, 0.147] & 0.613 & 1.07 & 1.14 & 0.000 & 0.053 & -- \\
+Climatology & 0.120 [0.099, 0.139] & 0.120 [0.099, 0.139] & 0.553 & 0.93 & 1.20 & 0.024 & 0.023 & -- \\
+Clim.+anomaly & 0.150 [0.125, 0.171] & 0.150 [0.125, 0.171] & 0.489 & 1.44 & 1.21 & 0.019 & 0.087 & -- \\
+Deterministic U-Net & 0.104 [0.094, 0.111] & 0.104 [0.094, 0.111] & 0.607 & 0.64 & 0.61 & 0.000 & 0.015 & 0.161 \\
+Diffusion (no physics) & 0.113 [0.098, 0.127] & 0.078 [0.067, 0.090] & 0.327 & 1.78 & 1.54 & 0.032 & 0.060 & 0.058 \\
+Physics-constrained (proposed) & 0.115 [0.099, 0.130] & 0.082 [0.069, 0.095] & 0.333 & 1.65 & 1.59 & 0.000 & 0.000 & 0.018 \\
+\hline
+\end{tabular}
+\end{table}

@@ -2,23 +2,23 @@
 
 ## Setup actually run
 
-- Locations: 69 ({'train': 49, 'val': 10, 'test': 10}); valid-pixel fraction 0.496; test windows 270 (drought fraction 0.126). Source: results/data/data_summary.json
-- physics-loss weights NOT tuned (no lambda sweep was run; config defaults lambda_rate=1, lambda_phen=0.5, lambda_mono=1); guidance scale 0.1 selected on validation from [0.0, 0.01, 0.1] - the largest value of the grid, so the optimum was not identified. Source: results/val/*.json
-- Preset **fast**, 1 seed (seed 0, no training-variance estimate); test evaluation on 100 windows (15 drought-labelled); ensemble members per row in results/test/metrics.csv.
+- Locations: 80 ({'train': 56, 'test': 12, 'val': 12}); valid-pixel fraction 0.501; test windows 350 (drought fraction 0.100). Source: results/data/data_summary.json
+- lambda scale 3.0 (selected on validation); guidance scale 0.1 selected on validation from [0.0, 0.01, 0.1] - the largest value of the grid, so the optimum was not identified; DDIM eta 0.0 selected on validation from [0.0, 0.5, 1.0] (calibration fix did not help: stochastic sampling lowered validation coverage). Source: results/val/*.json
+- Preset **medium_tuned**, 1 seed (seed 0, no training-variance estimate); test evaluation on 120 windows (11 drought-labelled); ensemble members per row in results/test/metrics.csv.
 
 ## Main comparison (test split)
 
 | Variant | MAE | CRPS | SSIM | grad ratio | HF ratio | rate viol. | env. viol. | mono viol. |
 |---|---|---|---|---|---|---|---|---|
-| persistence | 0.125 | 0.125 | 0.613 | 1.07 | 1.14 | 0.000 | 0.053 | n/a |
-| climatology | 0.120 | 0.120 | 0.553 | 0.93 | 1.20 | 0.024 | 0.023 | n/a |
-| clim_anomaly | 0.150 | 0.150 | 0.489 | 1.44 | 1.21 | 0.019 | 0.087 | n/a |
-| det | 0.104 | 0.104 | 0.607 | 0.64 | 0.61 | 0.000 | 0.015 | 0.161 |
-| diff_plain | 0.113 | 0.078 | 0.327 | 1.78 | 1.54 | 0.032 | 0.060 | 0.058 |
-| diff_phys+G+P | 0.115 | 0.082 | 0.333 | 1.65 | 1.59 | 0.000 | 0.000 | 0.018 |
-| diff_plain+G+P | 0.112 | 0.079 | 0.347 | 1.60 | 1.41 | 0.000 | 0.000 | 0.049 |
-| diff_phys | 0.115 | 0.081 | 0.320 | 1.79 | 1.74 | 0.022 | 0.040 | 0.021 |
-| diff_phys+G | 0.115 | 0.082 | 0.333 | 1.65 | 1.59 | 0.002 | 0.000 | 0.018 |
+| persistence | 0.127 | 0.127 | 0.619 | 1.04 | 1.05 | 0.000 | 0.083 | n/a |
+| climatology | 0.160 | 0.160 | 0.436 | 0.89 | 1.15 | 0.038 | 0.039 | n/a |
+| clim_anomaly | 0.163 | 0.163 | 0.468 | 1.43 | 1.21 | 0.032 | 0.109 | n/a |
+| det | 0.102 | 0.102 | 0.627 | 0.73 | 0.67 | 0.000 | 0.027 | 0.124 |
+| diff_plain | 0.116 | 0.079 | 0.358 | 1.69 | 1.52 | 0.021 | 0.056 | 0.084 |
+| diff_phys+G+P | 0.123 | 0.085 | 0.336 | 1.65 | 1.70 | 0.000 | 0.000 | 0.021 |
+| diff_plain+G+P | 0.116 | 0.080 | 0.376 | 1.55 | 1.43 | 0.000 | 0.000 | 0.075 |
+| diff_phys | 0.123 | 0.084 | 0.328 | 1.74 | 1.81 | 0.014 | 0.026 | 0.021 |
+| diff_phys+G | 0.123 | 0.085 | 0.336 | 1.65 | 1.70 | 0.003 | 0.000 | 0.021 |
 
 Source: results/test/metrics.csv (95 % bootstrap CIs over locations in results/test/metrics_ci.csv).
 
@@ -26,17 +26,17 @@ Source: results/test/metrics.csv (95 % bootstrap CIs over locations in results/t
 
 | Forecaster | windows | drought windows | mean Δ (drought windows) | mean Δ (all) | mean s normal | p90 s normal | mean s drought | frac. analog normal |
 |---|---|---|---|---|---|---|---|---|
-| det | 80 | 11 | -0.0222 | -0.0225 | 0.04 | 0.41 | 1.57 | 0.93 |
-| diff_phys_G_P_C | 80 | 11 | -0.0640 | -0.0598 | 0.04 | 0.41 | 1.57 | 0.93 |
-| diff_phys_G_P | 80 | 11 | -0.0636 | -0.0589 | 0.04 | 0.41 | 1.57 | 0.93 |
-| diff_phys | 80 | 11 | -0.0585 | -0.0536 | 0.04 | 0.41 | 1.57 | 0.93 |
-| diff_plain | 80 | 11 | -0.0407 | -0.0363 | 0.04 | 0.41 | 1.57 | 0.93 |
-| **observed** (drought windows) | | | anomaly vs other non-drought years -0.0229; matched DiD 0.0023 | | | | | |
-- diff_phys_G_P: model anomaly on drought windows -0.0611 = 2.7 x the observed anomaly.
-- diff_phys: model anomaly on drought windows -0.0564 = 2.5 x the observed anomaly.
-- diff_plain: model anomaly on drought windows -0.0394 = 1.7 x the observed anomaly.
-- det: model anomaly on drought windows -0.0220 = 1.0 x the observed anomaly.
-- Generated reading (thresholds: > 1.25x over-, < 0.8x under-estimation): over-estimate drought losses: diff_phys_G_P, diff_phys, diff_plain; under-estimate: none; closest to the observed anomaly: det. **A model anomaly far from the observed one is model bias, not a finding.**
+| det | 100 | 9 | -0.0524 | -0.0228 | 0.03 | 0.50 | 1.53 | 0.93 |
+| diff_phys_G_P_C | 100 | 9 | -0.0992 | -0.0636 | 0.03 | 0.50 | 1.53 | 0.93 |
+| diff_phys_G_P | 100 | 9 | -0.0990 | -0.0627 | 0.03 | 0.50 | 1.53 | 0.93 |
+| diff_phys | 100 | 9 | -0.0984 | -0.0609 | 0.03 | 0.50 | 1.53 | 0.93 |
+| diff_plain | 100 | 9 | -0.0775 | -0.0358 | 0.03 | 0.50 | 1.53 | 0.93 |
+| **observed** (drought windows) | | | anomaly vs other non-drought years -0.0741; matched DiD -0.0921 | | | | | |
+- diff_phys_G_P: model anomaly on drought windows -0.0978 = 1.3 x the observed anomaly.
+- diff_phys: model anomaly on drought windows -0.0974 = 1.3 x the observed anomaly.
+- diff_plain: model anomaly on drought windows -0.0766 = 1.0 x the observed anomaly.
+- det: model anomaly on drought windows -0.0502 = 0.7 x the observed anomaly.
+- Generated reading (thresholds: > 1.25x over-, < 0.8x under-estimation): over-estimate drought losses: diff_phys_G_P, diff_phys; under-estimate: det; closest to the observed anomaly: diff_plain. **A model anomaly far from the observed one is model bias, not a finding.**
 
 Δ = drought-scenario minus normal-scenario forecast (NDVI), ensemble and area mean. Compare the guided (+G+P) with the unguided physics model (diff_phys): guidance enforces the lower phenology bound only under the normal scenario, so part of a guided Δ can come from guidance. Source: results/effects/*.csv
 
@@ -44,18 +44,18 @@ Source: results/test/metrics.csv (95 % bootstrap CIs over locations in results/t
 
 | Claim | Verdict | Evidence |
 |---|---|---|
-| Physics-constrained diffusion is sharper than the deterministic baseline (closer to observed sharpness) | **not supported** | grad ratio 1.65 vs 0.64; HF ratio 1.59 vs 0.61 (1 = observed) |
-| Physics-constrained diffusion is sharper than unconstrained diffusion (closer to observed sharpness) | **no meaningful difference** | closeness |log ratio| sum 0.962 vs 1.010 (< 10 % apart); grad ratio 1.65 vs 1.78; HF ratio 1.59 vs 1.54 |
-| Physics constraints make forecasts more physically consistent | **partly supported (learned loss reduces monotone/envelope violations; guided/projected rates are zero by construction and below the observations' own rates = over-constraint)** | envelope / monotone violation fraction diff_phys+G+P 0.000 / 0.018, diff_phys 0.040 / 0.021, diff_plain 0.060 / 0.058, det 0.015 / 0.161; monotone violations are scored with the same stress perturbation used in the training loss (in-sample for the physics models); observations themselves: envelope 0.040, rate 0.024 (fewer violations than observed = over-constraint, not physics) |
-| Physics-constrained diffusion is more accurate (CRPS) than the baselines | **partly supported** | vs clim_anomaly: diff -0.0684 [-0.0806, -0.0532]; vs climatology: diff -0.0379 [-0.0546, -0.0193]; vs det: diff -0.0216 [-0.0298, -0.0131]; vs diff_plain: diff 0.0037 [0.0016, 0.0057]; vs persistence: diff -0.0436 [-0.0540, -0.0320] (negative = proposed better); MAE: vs climatology: -0.0053 [-0.0225, 0.0138]; vs det: 0.0110 [0.0014, 0.0209]; vs diff_plain: 0.0020 [-0.0004, 0.0041]; vs persistence: -0.0110 [-0.0204, -0.0003]. CRPS of a single deterministic forecast equals its MAE, so CRPS gains over point baselines partly reflect being an ensemble; physics constraints cost accuracy relative to unconstrained diffusion where that difference is positive. Source: results/test/paired_tests.csv |
-| Drought-attributable vegetation loss can be estimated credibly | **not supported (all informative observation-based checks fail; natural experiment uninformative: fewer than 10 matched pairs or covariate imbalance SMD > 0.25)** | model anomaly tracks observed anomaly (corr CI > 0): FAIL, cross-year proxy: normal forecast beats persistence and climatology: FAIL; corr -0.559, bias_model_minus_did -0.062, did_in_model_90pi 0.000, n_matched 5.000, anom_corr 0.158, anom_corr_lo95 -0.051, anom_slope 0.352; sanity only (inputs-based): scenario_placebo_mean -0.000, noise_placebo_mean 0.001, temporal_auc 0.962, perm_p_one_sided 0.001. Source: results/validation/validation_summary.csv |
-| Ensemble uncertainty is calibrated (uncertainty-aware estimates) | **not supported (overconfident: intervals too narrow)** | 90 % coverage 0.668, 50 % coverage 0.371, spread-skill 0.74 |
+| Physics-constrained diffusion is sharper than the deterministic baseline (closer to observed sharpness) | **not supported** | grad ratio 1.65 vs 0.73; HF ratio 1.70 vs 0.67 (1 = observed) |
+| Physics-constrained diffusion is sharper than unconstrained diffusion (closer to observed sharpness) | **not supported** | grad ratio 1.65 vs 1.69; HF ratio 1.70 vs 1.52 (1 = observed) |
+| Physics constraints make forecasts more physically consistent | **partly supported (learned loss reduces monotone/envelope violations; guided/projected rates are zero by construction and below the observations' own rates = over-constraint)** | envelope / monotone violation fraction diff_phys+G+P 0.000 / 0.021, diff_phys 0.026 / 0.021, diff_plain 0.056 / 0.084, det 0.027 / 0.124; monotone violations are scored with the same stress perturbation used in the training loss (in-sample for the physics models); observations themselves: envelope 0.042, rate 0.013 (fewer violations than observed = over-constraint, not physics) |
+| Physics-constrained diffusion is more accurate (CRPS) than the baselines | **partly supported** | vs clim_anomaly: diff -0.0787 [-0.0947, -0.0589]; vs climatology: diff -0.0748 [-0.0978, -0.0474]; vs det: diff -0.0171 [-0.0258, -0.0071]; vs diff_plain: diff 0.0056 [0.0009, 0.0113]; vs persistence: diff -0.0427 [-0.0585, -0.0235] (negative = proposed better); MAE: vs climatology: -0.0370 [-0.0585, -0.0102]; vs det: 0.0207 [0.0120, 0.0313]; vs diff_plain: 0.0070 [0.0011, 0.0141]; vs persistence: -0.0049 [-0.0206, 0.0149]. CRPS of a single deterministic forecast equals its MAE, so CRPS gains over point baselines partly reflect being an ensemble; physics constraints cost accuracy relative to unconstrained diffusion where that difference is positive. Source: results/test/paired_tests.csv |
+| Drought-attributable vegetation loss can be estimated credibly | **not supported (all informative observation-based checks fail; natural experiment uninformative: fewer than 10 matched pairs or covariate imbalance SMD > 0.25)** | model anomaly tracks observed anomaly (corr CI > 0): FAIL, cross-year proxy: normal forecast beats persistence and climatology: FAIL; corr -0.325, bias_model_minus_did 0.005, did_in_model_90pi 0.000, n_matched 3.000, anom_corr 0.117, anom_corr_lo95 -0.082, anom_slope 0.260; sanity only (inputs-based): scenario_placebo_mean 0.000, noise_placebo_mean -0.002, temporal_auc 0.966, perm_p_one_sided 0.000. Source: results/validation/validation_summary.csv |
+| Ensemble uncertainty is calibrated (uncertainty-aware estimates) | **not supported (overconfident: intervals too narrow)** | 90 % coverage 0.647, 50 % coverage 0.348, spread-skill 0.81 |
 
 ## Statistical caveats
 
-- 10 test locations: bootstrap intervals over so few location clusters are likely too narrow; p-values are from 1000 bootstrap draws (0.000 means < 0.001) and are not corrected for multiple comparisons.
-- Effects: 80 test windows, of which 11 drought-labelled at 6 locations (years [2021, 2022]).
-- Guidance scale 0.1 was selected on validation from [0.0, 0.01, 0.1]; it is the largest candidate (optimum not identified). On test, guidance changes 90 % coverage from 0.693 (projection only) to 0.668.
+- 12 test locations: bootstrap intervals over so few location clusters are likely too narrow; p-values are from 1000 bootstrap draws (0.000 means < 0.001) and are not corrected for multiple comparisons.
+- Effects: 100 test windows, of which 9 drought-labelled at 7 locations (years [2021, 2022]).
+- Guidance scale 0.1 was selected on validation from [0.0, 0.01, 0.1]; it is the largest candidate (optimum not identified). On test, guidance changes 90 % coverage from 0.665 (projection only) to 0.647.
 - Single training seed: differences of a few thousandths between diffusion variants may be within seed-to-seed variance.
 - **No conclusion about drought effects is solid yet**: the drought-labelled test sample is far too small (counts above).
 
