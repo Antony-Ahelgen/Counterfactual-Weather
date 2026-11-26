@@ -1,0 +1,154 @@
+{
+  "result_file": "effects_diff_phys_s0.csv",
+  "command": "python.exe scripts/effects.py --preset fast --members 8 --max_windows 80",
+  "git_commit": "47b97635235548c858fd74ac1d427778bbe5db5f",
+  "seed": 0,
+  "config": {
+    "data": {
+      "root": "data",
+      "raw_dir": "data/raw",
+      "processed_dir": "data/processed_fast",
+      "region_bbox": [
+        -2.0,
+        44.0,
+        24.0,
+        54.5
+      ],
+      "n_candidate_locations": 260,
+      "n_locations": 160,
+      "min_spacing_deg": 0.3,
+      "location_seed": 20240601,
+      "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023
+      ],
+      "doy_start": 61,
+      "n_bins": 49,
+      "bin_days": 5,
+      "patch_px": 64,
+      "resolution_m": 20,
+      "crs": "EPSG:3035",
+      "max_scene_cloud": 80,
+      "valid_scl": [
+        4,
+        5,
+        6
+      ],
+      "min_veg_fraction": 0.6,
+      "weather_years": [
+        2010,
+        2023
+      ],
+      "weather_model": "era5_seamless",
+      "locations_file": "manifests/locations_fast.csv"
+    },
+    "splits": {
+      "train_years": [
+        2017,
+        2018,
+        2019,
+        2023
+      ],
+      "val_years": [
+        2020
+      ],
+      "test_years": [
+        2021,
+        2022
+      ],
+      "frac_val_locations": 0.15,
+      "frac_test_locations": 0.15,
+      "split_seed": 7
+    },
+    "drought": {
+      "stress_window_days": 30,
+      "threshold": 1.0,
+      "min_stressed_days": 30,
+      "normal_max_s": 0.75,
+      "normal_max_stressed_days": 10,
+      "weights": {
+        "precip_deficit": 1.0,
+        "temp": 0.5,
+        "vpd": 0.5,
+        "soil_moisture": 1.0
+      }
+    },
+    "window": {
+      "context": 8,
+      "horizon": 8,
+      "stride": 2,
+      "patch": 32,
+      "min_context_valid": 0.3,
+      "min_target_valid": 0.2
+    },
+    "model": {
+      "base_ch": 32,
+      "ch_mult": [
+        1,
+        2,
+        2
+      ],
+      "emb_dim": 128,
+      "dropout": 0.0,
+      "n_res": 1
+    },
+    "diffusion": {
+      "timesteps": 1000,
+      "schedule": "cosine",
+      "prediction": "v",
+      "ddim_steps": 25,
+      "ema_decay": 0.999
+    },
+    "train": {
+      "batch_size": 32,
+      "lr": 0.0002,
+      "steps": 2500,
+      "grad_clip": 1.0,
+      "log_every": 100,
+      "ckpt_every": 500,
+      "val_every": 500,
+      "num_workers": 0,
+      "threads": 5
+    },
+    "physics": {
+      "rate_percentile": 99.5,
+      "rate_min_frame_valid": 0.95,
+      "phen_k": 2.0,
+      "env_min_frame_valid": 0.8,
+      "mono_eps": 0.01,
+      "lambda_rate": 1.0,
+      "lambda_phen": 0.5,
+      "lambda_mono": 1.0,
+      "guidance_scale": 0.1,
+      "lambda_range": 1.0,
+      "use_loss": true,
+      "use_guidance": true,
+      "use_projection": true,
+      "constraints": [
+        "rate",
+        "phen",
+        "mono"
+      ]
+    },
+    "eval": {
+      "n_members": 8,
+      "n_eval_windows": 100,
+      "seeds": [
+        0
+      ]
+    },
+    "preset": "fast"
+  },
+  "timestamp": "2026-11-26T17:07:42",
+  "python": "3.14.2",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "variant": "diff_phys",
+  "members": 8,
+  "split": "test",
+  "coupled": false
+}

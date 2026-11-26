@@ -88,7 +88,7 @@ def main() -> None:
     (tdir / "ablation.tex").write_text(tex_table(t2, cols2, "Physics ablation on the test split.", "tab:ablation"))
     # ---------- Fig: skill with CIs
     if ci is not None:
-        fig, axs = plt.subplots(1, 2, figsize=(plotting.COL_W, 1.9))
+        fig, axs = plt.subplots(1, 2, figsize=(plotting.COL_W, 1.9), layout="constrained")
         keys = [k for k in MAIN if k in set(ci.variant)]
         for ax, metric in zip(axs, ["mae", "crps"]):
             c = ci[ci.metric == metric].set_index("variant").loc[keys]
@@ -103,7 +103,7 @@ def main() -> None:
     # ---------- Fig: violations + sharpness (ablation variants)
     t2v = t2.copy()
     if len(t2v):
-        fig, axs = plt.subplots(1, 2, figsize=(plotting.COL_W, 2.2))
+        fig, axs = plt.subplots(1, 2, figsize=(plotting.COL_W, 2.2), layout="constrained")
         y = np.arange(len(t2v))
         hatches = ["", "////", "...."]
         for j, (col, lab) in enumerate([("rate_frac", "rate"), ("phen_frac", "envelope"), ("mono_frac", "monotone")]):
@@ -130,7 +130,7 @@ def main() -> None:
     hs = {k: json.loads((base / "test" / f"rank_hist_{k}_s{a.seed}.json").read_text())
           for k in ["diff_plain", "diff_phys_G_P"] if (base / "test" / f"rank_hist_{k}_s{a.seed}.json").exists()}
     if hs:
-        fig, axs = plt.subplots(1, len(hs), figsize=(plotting.COL_W * 0.75, 1.5), squeeze=False)
+        fig, axs = plt.subplots(1, len(hs), figsize=(plotting.COL_W * 0.75, 1.5), squeeze=False, layout="constrained")
         for ax, (k, h) in zip(axs[0], hs.items()):
             ax.bar(np.arange(len(h)), h, color="0.5", width=0.9)
             ax.axhline(1 / len(h), color="0", ls="--", lw=0.8)
@@ -144,7 +144,7 @@ def main() -> None:
         gm = pd.read_csv(g)
         gm["gamma"] = [float(v.split("Gx")[1].split("+")[0]) if "Gx" in v else 0.0 for v in gm.variant]
         gm = gm.sort_values("gamma")
-        fig, ax1 = plt.subplots(figsize=(plotting.COL_W * 0.6, 1.8))
+        fig, ax1 = plt.subplots(figsize=(plotting.COL_W * 0.6, 1.8), layout="constrained")
         xs = np.arange(len(gm))
         ax1.plot(xs, gm.crps, "o-", color="0", ms=3, label="CRPS")
         ax2 = ax1.twinx()
@@ -161,7 +161,7 @@ def main() -> None:
     eff = base / "effects" / f"effects_diff_phys_G_P_s{a.seed}.csv"
     if eff.exists():
         e = pd.read_csv(eff)
-        fig, axs = plt.subplots(1, 2, figsize=(plotting.COL_W, 1.9))
+        fig, axs = plt.subplots(1, 2, figsize=(plotting.COL_W, 1.9), layout="constrained")
         bins = np.linspace(min(e[["dON_mean", "dN2_mean", "dNi_mean"]].min().min(), -0.01),
                            max(e[["dON_mean", "dN2_mean", "dNi_mean"]].max().max(), 0.01), 30)
         axs[0].hist(e.loc[e.drought == 1, "dON_mean"], bins=bins, histtype="stepfilled", color="0.3", alpha=0.8,
@@ -173,7 +173,7 @@ def main() -> None:
         axs[0].axvline(0, color="0", lw=0.6)
         axs[0].set_xlabel("Estimated effect Δ (NDVI)")
         axs[0].set_ylabel("Windows")
-        axs[0].legend(frameon=False)
+        axs[0].legend(frameon=False, loc="upper left", fontsize=5.5)
         pairs = vdir / "natexp_pairs.csv"
         if pairs.exists():
             pr = pd.read_csv(pairs)

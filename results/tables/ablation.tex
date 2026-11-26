@@ -1,0 +1,17 @@
+\begin{table}[t]
+\centering
+\caption{Physics ablation on the test split.}
+\label{tab:ablation}
+\scriptsize
+\begin{tabular}{lrrrrrrr}
+\hline
+Model & MAE & CRPS & Grad. ratio & Rate viol. & Env. viol. & Mono. viol. & Members \\
+\hline
+Diffusion (no physics) & 0.113 [0.098, 0.127] & 0.078 [0.067, 0.090] & 1.78 & 0.032 & 0.060 & 0.058 & 8 \\
+Diff. + guid. + proj. & 0.112 [0.098, 0.126] & 0.079 [0.068, 0.091] & 1.60 & 0.000 & 0.000 & 0.049 & 8 \\
+Diff. + phys. loss & 0.115 [0.099, 0.130] & 0.081 [0.068, 0.094] & 1.79 & 0.022 & 0.040 & 0.021 & 8 \\
+Diff. + loss + guid. & 0.115 [0.100, 0.130] & 0.082 [0.069, 0.095] & 1.65 & 0.002 & 0.000 & 0.018 & 8 \\
+Physics-constrained (proposed) & 0.115 [0.099, 0.130] & 0.082 [0.069, 0.095] & 1.65 & 0.000 & 0.000 & 0.018 & 8 \\
+\hline
+\end{tabular}
+\end{table}
