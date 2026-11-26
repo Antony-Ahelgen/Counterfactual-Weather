@@ -84,6 +84,11 @@ def main() -> None:
         n_ = pd.read_csv(ne)
         if len(n_):
             put("d", "obsanomdrought", None, n_["anom_mean_obs_drought"].iloc[0], 3)
+    effp = RES / "effects" / "effects_diff_phys_G_P_s0.csv"
+    if effp.exists():
+        e_ = pd.read_csv(effp)
+        put("d", "neffdrought", None, int((e_.drought == 1).sum()), 0)
+        put("d", "neffdroughtloc", None, int(e_.loc[e_.drought == 1, "loc"].nunique()), 0)
     gc = RES / "val" / "guidance_choice.json"
     if gc.exists():
         lines.append(r"\expandafter\def\csname d@gamma\endcsname{" + f"{json.loads(gc.read_text())['guidance_scale']:g}" + "}")

@@ -36,9 +36,19 @@ All selection and verdict rules were (re)fixed in code before any model was trai
 
 Verdict-rule changes after this review only make verdicts stricter.
 
+## Owner review of the fast results — 2026-11-26
+
+| Finding | Action |
+|---|---|
+| Abstract stated a CRPS win over the deterministic network without noting that it wins on MAE and SSIM. | Abstract now reports MAE and SSIM (deterministic best) and explains that CRPS favours ensembles over single forecasts. |
+| λ sweep never ran; guidance scale at the grid edge. | Summary and paper state "λ not tuned (config defaults)" and that γ is the largest grid value (optimum not identified). |
+| AUDIT.md left the number audit unchecked. | Audit run and ticked (below). |
+| References not marked for checking; plain article skeleton. | refs.bib header requires authors to re-check every entry; [VERIFY] notes on entries with truncated author lists/unconfirmed details; TODO in main.tex to port to the Springer LNEE template. |
+| Tiny sample (10 test locations, 11 drought windows at 6 locations). | Abstract, conclusion and summary state that no conclusion about drought effects is solid yet (counts generated from results). |
+
 ## Pending (final audit, Section 11 of the brief)
 - [x] Clean-checkout test (2026-11-26): fresh `git clone` + fresh venv (torch CPU + requirements.lock) -> `tasks.py test` 32 passed, `tasks.py smoke` OK. It caught a critical packaging bug: `.gitignore` rule `data/` also ignored `src/cfveg/data/`, so the data package had never been committed; fixed by anchoring to `/data/`.
-- [ ] Number audit on final docs (`scripts/audit_numbers.py`)
+- [x] Number audit (`scripts/audit_numbers.py`): OK on 2026-11-26 over docs/*.md and paper/*.tex; re-run automatically by `scripts/promote_results.py` and `tasks.py paper-assets` after every results change
 - [x] Leakage audit re-run: tests/test_leakage.py passes; review 2 confirmed disjoint 49/10/10 locations (test ≥0.47° from train), disjoint years, train-only fitted objects, guidance chosen on validation <!--noaudit-->
 - [x] Red-team review 2 (results and claims) — see above
 - [x] Claim check in RESULTS_SUMMARY.md (generated; every abstract claim has a verdict)

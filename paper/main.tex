@@ -1,5 +1,8 @@
 % DRAFT: AI-assisted, author must verify every statement, number and reference before submission.
-% Plain article skeleton (Springer LNEE class not bundled; port to the publisher template for submission).
+% TODO (authors): this is a plain `article` skeleton. Port to the Springer LNEE / Springer Nature proceedings
+% LaTeX template required by the venue before submission (not bundled here); check the 10-page limit after porting.
+% TODO (authors): check every entry in refs.bib against the actual publication; entries marked [VERIFY] have
+% incomplete author lists.
 \documentclass[10pt]{article}
 \usepackage[margin=2.5cm]{geometry}
 \usepackage{graphicx,booktabs,amsmath,amssymb,hyperref,xcolor}
@@ -24,12 +27,15 @@ using common random numbers. Physical plausibility (growth/decline rate bounds, 
 monotone response to moisture stress) is imposed as auxiliary losses, sampling guidance and a final projection.
 Because the counterfactual is unobservable, we evaluate with a five-part framework: proxy back-tests, a matched
 natural experiment, placebo checks, calibration and constraint-violation rates. On \D{nloc} European locations
-(2017--2023) in a reduced-scale CPU study, diffusion ensembles outperform persistence, climatology and a
-deterministic network in CRPS, and the learned physics losses reduce monotonicity and envelope violations; however,
-the constraints slightly reduce accuracy relative to unconstrained diffusion, the ensembles are overconfident, and the
-estimated drought effects of the physics models are about \D{anom_ratio_diff_phys_G_P} times larger than the observed
-drought anomaly. Observation-based validation therefore does \emph{not} support the drought-effect estimates in this
-setting, a negative result that our framework makes visible.
+(2017--2023) in a reduced-scale CPU study, diffusion ensembles achieve a lower CRPS than persistence,
+climatology and a deterministic network, but this comparison favours ensembles over single forecasts: the
+deterministic network has the lowest MAE (\R{det}{mae} vs.\ \R{diff_phys_G_P}{mae}) and the highest SSIM
+(\R{det}{ssim} vs.\ \R{diff_phys_G_P}{ssim}). The learned physics losses reduce monotonicity and envelope violations,
+but the constraints slightly reduce accuracy relative to unconstrained diffusion, the ensembles are overconfident,
+and the estimated drought effects of the physics models are about \D{anom_ratio_diff_phys_G_P} times larger than the
+observed drought anomaly. Observation-based validation therefore does \emph{not} support the drought-effect estimates
+in this setting. With only \D{nloctest} test locations and \D{neffdrought} drought-labelled test windows at
+\D{neffdroughtloc} locations, no conclusion about drought effects is solid yet.
 \end{abstract}
 
 \section{Introduction}
@@ -152,7 +158,9 @@ of observations and the spread--skill ratio is \R{diff_phys_G_P}{spread_skill}.
 The drought effect is a model-based estimate, credible only if the model captures how weather drives vegetation and no
 unobserved factor drives both. Weather is coarse (9--31\,km) relative to 20\,m imagery. This is a reduced-scale CPU
 study: \D{nloc} locations, short training, one seed and small ensembles; confidence intervals over \D{nloctest} test
-locations are wide. The semi-synthetic oracle was not run (real data only), and per-constraint retraining ablations
+locations are wide. The physics-loss weights $\lambda$ were not tuned (configuration defaults
+$\lambda_{\text{rate}}{=}1$, $\lambda_{\text{phen}}{=}0.5$, $\lambda_{\text{mono}}{=}1$), and the guidance scale
+$\gamma=\D{gamma}$ was the largest value of the searched grid. The semi-synthetic oracle was not run (real data only), and per-constraint retraining ablations
 and the loss-weight sweep were not run. See \texttt{docs/LIMITATIONS.md}.
 
 \section{Conclusion}
@@ -162,7 +170,10 @@ drought-attributable loss estimates was not supported in this reduced-scale stud
 markedly larger drought losses than observed, and observation-based checks fail. The validation framework, in
 particular the observation-based anomaly and proxy checks, was essential to detect this; input-based placebos alone
 would have suggested success. Larger training sets, multiple seeds, better-calibrated ensembles and constraints
-calibrated against observed rather than idealised responses are the most important next steps.
+calibrated against observed rather than idealised responses are the most important next steps. The sample
+(\D{nloctest} test locations, \D{neffdrought} drought-labelled test windows) is too small for firm conclusions; the
+physics weights $\lambda$ were not tuned (configuration defaults), and the selected guidance scale lies at the edge of
+the searched grid, so its optimum was not identified.
 
 \paragraph{Data and code availability.} Contains modified Copernicus Sentinel data (2017--2023) and modified
 Copernicus Climate Change Service information. Weather data by Open-Meteo.com (CC BY 4.0). Produced using Copernicus

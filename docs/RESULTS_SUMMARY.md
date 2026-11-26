@@ -3,7 +3,7 @@
 ## Setup actually run
 
 - Locations: 69 ({'train': 49, 'val': 10, 'test': 10}); valid-pixel fraction 0.496; test windows 270 (drought fraction 0.126). Source: results/data/data_summary.json
-- Selected on validation: lambda scale None, guidance scale 0.1. Source: results/val/*.json
+- physics-loss weights NOT tuned (no lambda sweep was run; config defaults lambda_rate=1, lambda_phen=0.5, lambda_mono=1); guidance scale 0.1 selected on validation from [0.0, 0.01, 0.1] - the largest value of the grid, so the optimum was not identified. Source: results/val/*.json
 - Preset **fast**, 1 seed (seed 0, no training-variance estimate); test evaluation on 100 windows (15 drought-labelled); ensemble members per row in results/test/metrics.csv.
 
 ## Main comparison (test split)
@@ -57,6 +57,7 @@ Source: results/test/metrics.csv (95 % bootstrap CIs over locations in results/t
 - Effects: 80 test windows, of which 11 drought-labelled at 6 locations (years [2021, 2022]).
 - Guidance scale 0.1 was selected on validation from [0.0, 0.01, 0.1]; it is the largest candidate (optimum not identified). On test, guidance changes 90 % coverage from 0.693 (projection only) to 0.668.
 - Single training seed: differences of a few thousandths between diffusion variants may be within seed-to-seed variance.
+- **No conclusion about drought effects is solid yet**: the drought-labelled test sample is far too small (counts above).
 
 Not tested: semi-synthetic oracle (cut by project owner's instruction: no synthetic data). Classifier-free guidance ablation (not run, see PROGRESS.md).
 

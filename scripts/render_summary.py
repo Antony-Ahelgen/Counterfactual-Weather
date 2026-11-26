@@ -70,8 +70,15 @@ def main() -> None:
                  f"(drought fraction {f(data.get('windows_test', {}).get('drought_frac'))}). "
                  f"Source: results/data/data_summary.json")
     if choice:
-        L.append(f"- Selected on validation: lambda scale {choice.get('lambda_choice', {}).get('lambda_scale')}, "
-                 f"guidance scale {choice.get('guidance_choice', {}).get('guidance_scale')}. "
+        lam = choice.get("lambda_choice", {}).get("lambda_scale")
+        gch = choice.get("guidance_choice", {})
+        lam_txt = (f"lambda scale {lam} (selected on validation)" if lam is not None else
+                   "physics-loss weights NOT tuned (no lambda sweep was run; config defaults lambda_rate=1, "
+                   "lambda_phen=0.5, lambda_mono=1)")
+        g = gch.get("guidance_scale")
+        edge = (" - the largest value of the grid, so the optimum was not identified"
+                if g is not None and g == max(gch.get("candidates", [g])) else "")
+        L.append(f"- {lam_txt}; guidance scale {g} selected on validation from {gch.get('candidates')}{edge}. "
                  f"Source: results/val/*.json")
     prov = base / "test" / "metrics.provenance.json"
     preset = json.loads(prov.read_text()).get("config", {}).get("preset", "?") if prov.exists() else "?"
@@ -270,6 +277,8 @@ def main() -> None:
                    f"{f(m.loc[P, 'cov90'])}.")
     cav.append("- Single training seed: differences of a few thousandths between diffusion variants may be within "
                "seed-to-seed variance.")
+    cav.append("- **No conclusion about drought effects is solid yet**: the drought-labelled test sample is far too "
+               "small (counts above).")
     L += cav
     L += ["", "Not tested: semi-synthetic oracle (cut by project owner's instruction: no synthetic data). "
           "Classifier-free guidance ablation (not run, see PROGRESS.md).", "",
