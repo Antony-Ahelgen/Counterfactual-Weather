@@ -26,7 +26,7 @@ from cfveg.counterfactual.effects import (det_forecast_fn, effects_table, sample
 from cfveg.data.dataset import WindowDataset, make_windows  # noqa: E402
 from cfveg.data.scenarios import ScenarioBuilder  # noqa: E402
 from cfveg.utils.provenance import write_provenance  # noqa: E402
-from cfveg.validation.framework import cross_year_proxy  # noqa: E402
+from cfveg.validation.framework import cross_year_proxy, did_pixels  # noqa: E402
 
 
 def effect_windows(ctx: Ctx, split: str, t0_stride: int, max_windows: int, seed: int = 0) -> np.ndarray:
@@ -46,7 +46,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--preset", default="cpu")
     ap.add_argument("--split", default="test")
-    ap.add_argument("--variants", nargs="*", default=["diff_phys+G+P", "diff_phys+G+P+C", "diff_plain", "det"])
+    ap.add_argument("--variants", nargs="*", default=["diff_phys+G+P", "diff_phys+G+P+C", "diff_phys", "diff_plain", "det"])
     ap.add_argument("--members", type=int, default=None)
     ap.add_argument("--t0_stride", type=int, default=4)
     ap.add_argument("--max_windows", type=int, default=400)
@@ -89,7 +89,14 @@ def main() -> None:
             fc = {"normal": r["xN"].mean(0) - last, "factual": r["xO"].mean(0) - last,
                   "persistence": np.zeros_like(r["xN"][0]),
                   "climatology": clim[t0 + K_:t0 + K_ + H_] - clim[t0 + K_ - 1][None]}
-            r.update(cross_year_proxy(ctx.cube, ctx.cfg, l, y, t0, oy, ox, fc))
+            anom = r["xO"].mean(0) - r["xN"].mean(0)
+            r.update(cross_year_proxy(ctx.cube, ctx.cfg, l, y, t0, oy, ox, fc, model_anom=anom))
+            # model effect on the natural-experiment (DiD) pixel set: horizon mean over pixels observed
+            # both before and after the forecast start
+            seq = np.asarray(ctx.cube.ndvi[l, y, t0:t0 + K_ + H_, oy:oy + P_, ox:ox + P_], dtype=np.float32)
+            _, _, msk = did_pixels(seq, K_)
+            if msk.any():
+                r["dON_did"] = (r["xO"] - r["xN"]).mean(1)[:, msk].mean(1)
             for k in ["xN", "xD", "xO"]:
                 r.pop(k)
             recs.append(r)

@@ -20,7 +20,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from cfveg.data.dataset import Cube  # noqa: E402
 from cfveg.utils.provenance import load_preset, write_provenance  # noqa: E402
 from cfveg.validation.evaluate import bootstrap_ci  # noqa: E402
-from cfveg.validation.framework import natural_experiment, placebos  # noqa: E402
+from cfveg.validation.framework import anomaly_agreement, natural_experiment, placebos  # noqa: E402
 
 
 def save(df: pd.DataFrame, path: Path, **extra) -> None:
@@ -84,6 +84,7 @@ def main() -> None:
         r = {"variant": name, **{k: v for k, v in ne["summary"].items() if k != "smd"}}
         if "smd" in ne["summary"]:
             r.update({f"smd_{k}": v for k, v in ne["summary"]["smd"].items()})
+        r.update(anomaly_agreement(e, seed=s))
         ne_rows.append(r)
         if name == main_safe and len(ne["pairs"]):
             save(ne["pairs"], out / "natexp_pairs.csv", part="2", variant=name)
@@ -125,7 +126,8 @@ def main() -> None:
                 add("1b_crossyear", r["variant"] + f" [{r['subset']}]", k, r[k])
     for r in ne_rows:
         for k in ["n_matched", "max_abs_smd", "did_mean", "model_mean", "bias_model_minus_did", "corr",
-                  "did_in_model_90pi"]:
+                  "did_in_model_90pi", "anom_n", "anom_corr", "anom_corr_lo95", "anom_corr_hi95", "anom_slope",
+                  "anom_mean_obs_drought", "anom_mean_model_drought"]:
             if k in r:
                 add("2_natural_experiment", r["variant"], k, r[k])
     for r in pl_rows:

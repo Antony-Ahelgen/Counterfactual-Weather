@@ -39,7 +39,7 @@ def baseline_variants(clim: np.ndarray, K: int, H: int) -> list[Variant]:
     ]
 
 
-def deterministic_variant(model, name: str = "deterministic") -> Variant:
+def deterministic_variant(model, name: str = "det") -> Variant:
     @torch.no_grad()
     def f(b, m, s):
         return scaled_to_ndvi(model(None, torch.zeros(b["tgt"].shape[0], dtype=torch.long), b))[None]
@@ -55,6 +55,21 @@ def diffusion_variant(sampler, name: str) -> Variant:
         x = sampler.sample(big, noise.view(m * B, *b["tgt"].shape[1:]))
         return scaled_to_ndvi(x).view(m, B, *b["tgt"].shape[1:])
     return Variant(name, f, True, True)
+
+
+def evaluate_observed(batches: list[dict], phys) -> dict:
+    """Violation rates of the OBSERVED targets (valid pixels only; rate steps need consecutive valid frames).
+    Reference for over-constraint: a forecast with far fewer violations than reality is not 'more physical'."""
+    viol = {"rate_frac": [], "phen_frac": [], "range_frac": [], "rate_mag": [], "phen_mag": []}
+    w = []
+    for b in batches:
+        v = phys.violations(b["tgt"], b, 1.0 - b["drought"], mask=b["tgt_mask"])
+        for k in viol:
+            viol[k].append(v[k])
+        w.append(b["tgt_mask"].sum().item())
+    out = {k: float(np.average(v, weights=w)) for k, v in viol.items()}
+    out["variant"] = "observed"
+    return out
 
 
 def evaluate(variant: Variant, batches: list[dict], phys, n_members: int, wx_mean, wx_std, K: int,

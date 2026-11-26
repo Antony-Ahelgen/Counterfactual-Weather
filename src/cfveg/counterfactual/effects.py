@@ -100,7 +100,10 @@ def effects_table(records: list[dict]) -> pd.DataFrame:
         row = {k: r[k] for k in ["loc", "year", "t0", "oy", "ox", "drought", "n_method", "d_method", "n_analogs",
                                  "s_N", "s_D", "s_O", "frac_drought_above_normal", "var_crn", "var_ind"]}
         row.update({k: v for k, v in r.items() if k.startswith("xp_")})
-        for k in ["dDN", "dON", "dN2", "dNi"]:
+        for k in ["dDN", "dON", "dN2", "dNi", "dON_did"]:
+            if k not in r:
+                row[f"{k}_mean"] = np.nan
+                continue
             v = r[k]
             row[f"{k}_mean"] = float(np.mean(v))
             row[f"{k}_q05"], row[f"{k}_q95"] = (float(np.percentile(v, 5)), float(np.percentile(v, 95)))

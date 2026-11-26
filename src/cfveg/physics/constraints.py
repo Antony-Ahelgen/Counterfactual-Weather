@@ -25,6 +25,7 @@ def fit_physics(cube, cfg: dict) -> dict:
     m = cube.loc_year_mask("train", cfg)
     pct = cfg["physics"]["rate_percentile"]
     min_fv = cfg["physics"].get("rate_min_frame_valid", 0.95)
+    env_fv = cfg["physics"].get("env_min_frame_valid", 0.8)
     thr = cfg["drought"]["threshold"]
     bd = cube.meta["bin_days"]
     nb = cube.ndvi.shape[2]
@@ -55,7 +56,7 @@ def fit_physics(cube, cfg: dict) -> dict:
             incs[k].append(dk[dk > 0])
             decs[k].append(-dk[dk < 0])
             v = nd[:, sel]                                    # [B, n]
-            ok = np.isfinite(v) & (s_bin < thr)[:, None]
+            ok = np.isfinite(v) & (s_bin < thr)[:, None] & (fv >= env_fv)[:, None]
             vv = np.where(ok, v, 0.0)
             sums[k] += vv.sum(1)
             sq[k] += (vv ** 2).sum(1)
@@ -81,7 +82,7 @@ def fit_physics(cube, cfg: dict) -> dict:
     mu = np.stack([np.convolve(np.pad(r, 1, mode="edge"), ker, "valid") for r in mu])
     sd = np.stack([np.convolve(np.pad(r, 1, mode="edge"), ker, "valid") for r in sd])
     return {"r_inc": r_inc.tolist(), "r_dec": r_dec.tolist(), "mu": mu.tolist(), "sigma": sd.tolist(),
-            "count": cnt.tolist(), "percentile": pct, "min_frame_valid": min_fv, "fitted_on": "train locations x train years"}
+            "count": cnt.tolist(), "percentile": pct, "min_frame_valid": min_fv, "env_min_frame_valid": env_fv, "fitted_on": "train locations x train years"}
 
 
 class Physics:
@@ -111,10 +112,20 @@ class Physics:
         sd = self.sigma[g[:, None], b[:, :, None, None]]
         return mu - self.k * sd, mu + self.k * sd
 
+    def _dt(self, batch: dict, H: int) -> torch.Tensor:
+        """Days spanned by each step [B, H, P, P]: first step uses the true gap since the last valid
+        context observation (never-observed pixels -> very long gap, i.e. effectively unconstrained)."""
+        gap = batch.get("last_gap")
+        B, P = batch["last_ndvi"].shape[0], batch["last_ndvi"].shape[-1]
+        dt = torch.full((B, H, P, P), float(self.bin_days), device=batch["last_ndvi"].device)
+        if gap is not None:
+            dt[:, 0] = gap * self.bin_days
+        return dt
+
     def rates(self, ndvi: torch.Tensor, batch: dict) -> torch.Tensor:
-        """Daily rate between consecutive frames incl. step from last context frame. [B, H, P, P]."""
+        """Daily rate between consecutive frames incl. the step from the last valid context value. [B,H,P,P]."""
         prev = torch.cat([batch["last_ndvi"][:, None], ndvi[:, :-1]], dim=1)
-        return (ndvi - prev) / self.bin_days
+        return (ndvi - prev) / self._dt(batch, ndvi.shape[1])
 
     # ---------- energies (per-sample mean; multiply by #pixels for sums) ----------
     def rate_energy(self, x0_scaled: torch.Tensor, batch: dict) -> torch.Tensor:
@@ -146,12 +157,13 @@ class Physics:
     def project(self, x0_scaled: torch.Tensor, batch: dict, rate: bool = True) -> torch.Tensor:
         ndvi = scaled_to_ndvi(x0_scaled).clamp(NDVI_MIN, NDVI_MAX)
         if rate:
-            ri = self.r_inc[batch["lcg"]] * self.bin_days
-            rd = self.r_dec[batch["lcg"]] * self.bin_days
+            dt = self._dt(batch, ndvi.shape[1])
+            ri_d = self.r_inc[batch["lcg"]]
+            rd_d = self.r_dec[batch["lcg"]]
             prev = batch["last_ndvi"]
             frames = []
             for h in range(ndvi.shape[1]):
-                cur = torch.minimum(torch.maximum(ndvi[:, h], prev - rd), prev + ri)
+                cur = torch.minimum(torch.maximum(ndvi[:, h], prev - rd_d * dt[:, h]), prev + ri_d * dt[:, h])
                 frames.append(cur)
                 prev = cur
             ndvi = torch.stack(frames, 1)
@@ -161,7 +173,10 @@ class Physics:
 
     # ---------- violation metrics (fractions, NDVI units) ----------
     @torch.no_grad()
-    def violations(self, x0_scaled: torch.Tensor, batch: dict, normal: torch.Tensor, tol: float = 1e-4) -> dict:
+    def violations(self, x0_scaled: torch.Tensor, batch: dict, normal: torch.Tensor, tol: float = 1e-4,
+                   mask: torch.Tensor | None = None) -> dict:
+        """Violation fractions over pixel-timesteps. Never-observed first steps are excluded from the rate
+        check. With `mask` (e.g. observed targets), only valid pixels count; rate steps need both ends valid."""
         ndvi = scaled_to_ndvi(x0_scaled)
         g = self.rates(ndvi, batch)
         ri = self.r_inc[batch["lcg"]][:, None]
@@ -170,10 +185,18 @@ class Physics:
         lo, hi = self.envelope(batch)
         phen_ex = F.relu(ndvi - hi) + normal.view(-1, 1, 1, 1) * F.relu(lo - ndvi)
         rng_ex = F.relu(ndvi - NDVI_MAX) + F.relu(NDVI_MIN - ndvi)
-        return {
-            "rate_frac": (rate_ex > tol).float().mean().item(),
-            "rate_mag": rate_ex[rate_ex > tol].mean().item() if (rate_ex > tol).any() else 0.0,
-            "phen_frac": (phen_ex > tol).float().mean().item(),
-            "phen_mag": phen_ex[phen_ex > tol].mean().item() if (phen_ex > tol).any() else 0.0,
-            "range_frac": (rng_ex > tol).float().mean().item(),
-        }
+        m = torch.ones_like(ndvi) if mask is None else mask.float()
+        first_ok = (batch.get("last_gap", torch.ones_like(batch["last_ndvi"])) < 50).float()
+        prev_m = torch.cat([first_ok[:, None], m[:, :-1]], dim=1)
+        rm = m * prev_m
+        if mask is not None:   # observed series: a valid step needs consecutive valid frames (no gaps)
+            rm[:, 0] = rm[:, 0] * (batch.get("last_gap", torch.ones_like(batch["last_ndvi"])) <= 1).float()
+
+        def frac(ex, w):
+            return ((ex > tol).float() * w).sum().item() / max(w.sum().item(), 1.0)
+
+        def mag(ex, w):
+            sel = (ex > tol) & (w > 0)
+            return ex[sel].mean().item() if sel.any() else 0.0
+        return {"rate_frac": frac(rate_ex, rm), "rate_mag": mag(rate_ex, rm), "phen_frac": frac(phen_ex, m),
+                "phen_mag": mag(phen_ex, m), "range_frac": frac(rng_ex, m)}

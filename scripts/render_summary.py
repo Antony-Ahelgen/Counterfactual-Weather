@@ -1,16 +1,21 @@
 """Generate docs/RESULTS_SUMMARY.md from results/ (no hand-typed numbers).
 
 Verdict rules for the abstract's claims are fixed here, before results were seen:
-  C1 sharper than deterministic baseline:   proposed grad_ratio > det grad_ratio AND hf_ratio > det hf_ratio
-  C1b vs unconstrained diffusion: reported as "closer to observed sharpness" if |log grad_ratio| is smaller
-  C2 more physically consistent:          summed violation rate (rate+env+mono) of proposed lower than both
-                                          diffusion(no physics) and deterministic -> supported; lower than one -> partly
+  C1 sharper (vs deterministic and vs diffusion without physics): smaller |log grad_ratio| + |log hf_ratio|
+                                          (closer to the observed sharpness; noise does not count as a win)
+  C2 more physically consistent:          envelope+monotone violations of the proposed model lower than diffusion
+                                          (no physics) and deterministic AND the loss-only physics model lower than
+                                          diffusion (no physics), each by >= 10 % relative -> supported; lower only via guidance/projection ->
+                                          partly. Violation rates of the observations are reported as reference.
   C3 accuracy vs baselines:               paired-bootstrap 95 % CI of CRPS difference (proposed - other) < 0 for
                                           all baselines -> supported; some -> partly; none -> not supported
-  C4 credible drought-effect estimates:   (a) scenario-placebo |mean| < 0.01 and its 95 % CI contains 0 or lies
-                                          within +-0.01; (b) temporal AUC > 0.6; (c) permutation p < 0.05 with
-                                          real contrast < 0; (d) natural-experiment corr > 0 and |bias| < 0.02.
-                                          4/4 supported, 2-3 partly, <2 not supported
+  C4 credible drought-effect estimates:   only OBSERVATION-based checks count (revised after the red-team review,
+                                          before any real-data result existed): (a) natural experiment corr > 0 and
+                                          |bias| < 0.02; (b) model-vs-observed anomaly correlation with 95 % CI > 0;
+                                          (c) cross-year proxy: normal-scenario forecast beats persistence and
+                                          climatology on drought windows. All pass -> supported, 2 -> partly, else not;
+                                          fewer than 3 runnable -> insufficient evidence. Placebos, temporal AUC and
+                                          permutation test are model-input-based sanity checks, reported only.
   C5 uncertainty-aware (calibration):     90 % coverage within [0.8, 0.95] and spread-skill in [0.7, 1.3]
 """
 from __future__ import annotations
@@ -71,31 +76,38 @@ def main() -> None:
                      f"{f(r.get('mono_frac'))} |")
     L += ["", "Source: results/test/metrics.csv (95 % bootstrap CIs over locations in results/test/metrics_ci.csv).", ""]
     verdicts = []
-    # ---- C1 sharpness
-    if P in m.index and "det" in m.index:
-        sharper = m.loc[P, "grad_ratio"] > m.loc["det", "grad_ratio"] and m.loc[P, "hf_ratio"] > m.loc["det", "hf_ratio"]
-        closer = None
-        if "diff_plain" in m.index:
-            closer = abs(np.log(m.loc[P, "grad_ratio"])) < abs(np.log(m.loc["diff_plain", "grad_ratio"]))
-        verdicts.append(("Physics-constrained diffusion gives sharper forecasts than the deterministic baseline",
-                         "supported" if sharper else "not supported",
-                         f"grad ratio {f(m.loc[P, 'grad_ratio'], 2)} vs {f(m.loc['det', 'grad_ratio'], 2)}; HF ratio "
-                         f"{f(m.loc[P, 'hf_ratio'], 2)} vs {f(m.loc['det', 'hf_ratio'], 2)}"))
-        if closer is not None:
-            verdicts.append(("...and sharper (closer to observed sharpness) than unconstrained diffusion",
-                             "supported" if closer else "not supported",
-                             f"grad ratio {f(m.loc[P, 'grad_ratio'], 2)} vs {f(m.loc['diff_plain', 'grad_ratio'], 2)} "
-                             f"(1 = observed)"))
-    # ---- C2 physics
-    def viol(v):
+    # ---- C1 sharpness: closeness of prediction/observation sharpness ratios to 1 (|log ratio|), so that
+    #      noise ("too sharp") does not count as a win (red-team M5)
+    def closeness(v):
+        return abs(np.log(m.loc[v, "grad_ratio"])) + abs(np.log(m.loc[v, "hf_ratio"]))
+    for other, label in [("det", "the deterministic baseline"), ("diff_plain", "unconstrained diffusion")]:
+        if P in m.index and other in m.index:
+            better = closeness(P) < closeness(other)
+            verdicts.append((f"Physics-constrained diffusion is sharper than {label} (closer to observed sharpness)",
+                             "supported" if better else "not supported",
+                             f"grad ratio {f(m.loc[P, 'grad_ratio'], 2)} vs {f(m.loc[other, 'grad_ratio'], 2)}; "
+                             f"HF ratio {f(m.loc[P, 'hf_ratio'], 2)} vs {f(m.loc[other, 'hf_ratio'], 2)} (1 = observed)"))
+    # ---- C2 physics (red-team M1): rate violations are ~0 by construction under projection, so the verdict uses
+    #      envelope + monotone violations, requires the LEARNED model (loss only, no guidance/projection) to
+    #      improve on unconstrained diffusion, and reports the violation rate of the observations themselves.
+    def viol2(v):
         r = m.loc[v]
-        return float(np.nansum([r.get("rate_frac", np.nan), r.get("phen_frac", np.nan), r.get("mono_frac", np.nan)]))
+        return float(np.nansum([r.get("phen_frac", np.nan), r.get("mono_frac", np.nan)]))
     if P in m.index:
         others = [v for v in ["diff_plain", "det"] if v in m.index]
-        lower = [v for v in others if viol(P) < viol(v)]
-        verdicts.append(("Physics constraints make forecasts more physically consistent",
-                         "supported" if len(lower) == len(others) and others else ("partly supported" if lower else "not supported"),
-                         "summed violation fraction " + ", ".join(f"{v} {f(viol(v))}" for v in [P] + others)))
+        # a reduction counts only if >= 10 % relative (pre-specified margin; no tiny differences)
+        lower = [v for v in others if viol2(P) < 0.9 * viol2(v)]
+        learned = ("diff_phys" in m.index and "diff_plain" in m.index and
+                   viol2("diff_phys") < 0.9 * viol2("diff_plain"))
+        verdict = ("supported" if others and len(lower) == len(others) and learned else
+                   "partly supported (only via guidance/projection)" if lower else "not supported")
+        ev = "envelope+monotone violation fraction " + ", ".join(
+            f"{v} {f(viol2(v))}" for v in [P, "diff_phys"] + others if v in m.index)
+        if "observed" in m.index:
+            obs = m.loc["observed"]
+            ev += (f"; observations themselves: envelope {f(obs.get('phen_frac'))}, rate {f(obs.get('rate_frac'))} "
+                   f"(fewer violations than observed = over-constraint, not physics)")
+        verdicts.append(("Physics constraints make forecasts more physically consistent", verdict, ev))
     # ---- C3 accuracy
     pt = base / "test" / "paired_tests.csv"
     if pt.exists():
@@ -111,28 +123,33 @@ def main() -> None:
     if vs.exists():
         s = pd.read_csv(vs)
         s = s[s.variant == P.replace("+", "_")].set_index("metric").value
-        pl = pd.read_csv(base / "validation" / "placebo.csv").set_index("variant")
-        pr = pl.loc[P.replace("+", "_")] if P.replace("+", "_") in pl.index else None
         checks = {}
-        if pr is not None and "scenario_placebo_mean" in pr and np.isfinite(pr["scenario_placebo_mean"]):
-            checks["scenario placebo ~0"] = abs(pr["scenario_placebo_mean"]) < 0.01 and (
-                (pr["scenario_placebo_lo95"] <= 0 <= pr["scenario_placebo_hi95"]) or
-                (abs(pr["scenario_placebo_lo95"]) < 0.01 and abs(pr["scenario_placebo_hi95"]) < 0.01))
         fin = lambda k: k in s and np.isfinite(s[k])  # noqa: E731  (missing/NaN -> check not run)
-        if fin("temporal_auc"):
-            checks["temporal AUC > 0.6"] = s["temporal_auc"] > 0.6
-        if fin("perm_p_one_sided") and fin("perm_real_contrast"):
-            checks["permutation p < 0.05"] = s["perm_p_one_sided"] < 0.05 and s["perm_real_contrast"] < 0
+        # Only checks that involve OBSERVED outcomes count (red-team C1). Placebos, temporal AUC and the
+        # permutation test use model inputs only and are reported as sanity checks, not as evidence.
         if fin("corr") and fin("bias_model_minus_did"):
-            checks["natural experiment agrees"] = s["corr"] > 0 and abs(s["bias_model_minus_did"]) < 0.02
+            checks["natural experiment agrees (corr>0, |bias|<0.02)"] = (
+                s["corr"] > 0 and abs(s["bias_model_minus_did"]) < 0.02)
+        if fin("anom_corr_lo95"):
+            checks["model anomaly tracks observed anomaly (corr CI > 0)"] = s["anom_corr_lo95"] > 0
+        xpf = base / "validation" / "proxy_crossyear.csv"
+        if xpf.exists():
+            x = pd.read_csv(xpf)
+            x = x[(x.variant == P.replace("+", "_")) & (x.subset == "drought windows")]
+            if len(x) and {"mae_normal", "mae_persistence", "mae_climatology"} <= set(x.columns):
+                r0 = x.iloc[0]
+                checks["cross-year proxy: normal forecast beats persistence and climatology"] = bool(
+                    r0.mae_normal < r0.mae_persistence and r0.mae_normal < r0.mae_climatology)
         n = sum(checks.values())
         ev = ", ".join(f"{k}: {'pass' if v else 'FAIL'}" for k, v in checks.items())
-        ev += "; " + ", ".join(f"{k} {f(s[k])}" for k in ["scenario_placebo_mean", "noise_placebo_mean", "temporal_auc",
-                                                         "perm_real_contrast", "perm_p_one_sided", "corr",
-                                                         "bias_model_minus_did", "did_in_model_90pi", "n_matched"] if k in s)
+        ev += "; " + ", ".join(f"{k} {f(s[k])}" for k in ["corr", "bias_model_minus_did", "did_in_model_90pi",
+                                                         "n_matched", "anom_corr", "anom_corr_lo95", "anom_slope"]
+                               if k in s)
+        ev += "; sanity only (inputs-based): " + ", ".join(f"{k} {f(s[k])}" for k in [
+            "scenario_placebo_mean", "noise_placebo_mean", "temporal_auc", "perm_p_one_sided"] if k in s)
         verdicts.append(("Drought-attributable vegetation loss can be estimated credibly",
-                         "insufficient evidence (fewer than 3 of 4 checks could run)" if len(checks) < 3 else
-                         ("supported" if n == len(checks) == 4 else
+                         "insufficient evidence (fewer than 3 observation-based checks could run)"
+                         if len(checks) < 3 else ("supported" if n == len(checks) else
                                                           ("partly supported" if n >= 2 else "not supported")),
                          ev + ". Source: results/validation/validation_summary.csv"))
     # ---- C5 calibration
@@ -142,6 +159,27 @@ def main() -> None:
         verdicts.append(("Ensemble uncertainty is calibrated (uncertainty-aware estimates)",
                          "supported" if ok else "not supported",
                          f"90 % coverage {f(c90)}, 50 % coverage {f(m.loc[P, 'cov50'])}, spread-skill {f(ss, 2)}"))
+    # ---- drought-effect estimates per forecaster (guided vs unguided shows how much of the effect comes from
+    #      physics guidance/projection rather than the learned weather response; red-team M3)
+    effd = base / "effects"
+    rows = []
+    for fe in sorted(effd.glob("effects_*_s0.csv")):
+        e = pd.read_csv(fe)
+        d = e[e.drought == 1]
+        rows.append((fe.stem.removeprefix("effects_").removesuffix("_s0"), len(e), len(d),
+                     d.dDN_mean.mean() if len(d) else np.nan, e.dDN_mean.mean(),
+                     e.s_N.mean(), e.s_N.quantile(0.9), e.s_D.mean(), (e.n_method == "analog").mean()))
+    if rows:
+        L += ["## Drought-effect estimates (test windows)", "",
+              "| Forecaster | windows | drought windows | mean Δ (drought windows) | mean Δ (all) | mean s normal | "
+              "p90 s normal | mean s drought | frac. analog normal |", "|---|---|---|---|---|---|---|---|---|"]
+        for r in rows:
+            L.append(f"| {r[0]} | {r[1]} | {r[2]} | {f(r[3], 4)} | {f(r[4], 4)} | {f(r[5], 2)} | {f(r[6], 2)} | "
+                     f"{f(r[7], 2)} | {f(r[8], 2)} |")
+        L += ["", "Δ = drought-scenario minus normal-scenario forecast (NDVI), ensemble and area mean. Compare the "
+              "guided (+G+P) with the unguided physics model (diff_phys): guidance enforces the lower phenology bound "
+              "only under the normal scenario, so part of a guided Δ can come from guidance. "
+              "Source: results/effects/*.csv", ""]
     L += ["## Claim check (abstract hypotheses; rules fixed in scripts/render_summary.py)", "",
           "| Claim | Verdict | Evidence |", "|---|---|---|"]
     for c, v, e in verdicts:

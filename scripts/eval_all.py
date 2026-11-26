@@ -33,9 +33,9 @@ from cfveg.models.train import collate, load_model  # noqa: E402
 from cfveg.physics.constraints import Physics  # noqa: E402
 from cfveg.utils.provenance import load_preset, write_provenance  # noqa: E402
 from cfveg.validation.evaluate import (baseline_variants, bootstrap_ci, deterministic_variant,  # noqa: E402
-                                       diffusion_variant, evaluate, paired_bootstrap)
+                                       diffusion_variant, evaluate, evaluate_observed, paired_bootstrap)
 
-MAIN_TEST = ["persistence", "climatology", "clim_anomaly", "det", "diff_plain", "diff_phys+G+P"]
+MAIN_TEST = ["observed", "persistence", "climatology", "clim_anomaly", "det", "diff_plain", "diff_phys+G+P"]
 ABLATION = ["diff_plain+G", "diff_plain+G+P", "diff_phys", "diff_phys+G", "diff_phys_no_rate+G+P",
             "diff_phys_no_phen+G+P", "diff_phys_no_mono+G+P"]
 
@@ -130,6 +130,12 @@ def main() -> None:
     old = pd.read_csv(mpath) if mpath.exists() else None
     for spec in variants:
         t = time.time()
+        if spec == "observed":
+            res = evaluate_observed(batches, ctx.phys)
+            res.update({"seed": a.seed, "members": 0, "secs": round(time.time() - t, 1)})
+            rows.append(res)
+            print(f"observed: rate={res['rate_frac']:.4f} phen={res['phen_frac']:.4f}", flush=True)
+            continue
         try:
             v = ctx.variant(spec)
         except FileNotFoundError as e:

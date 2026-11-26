@@ -142,7 +142,7 @@ def main() -> None:
     g = base / "val_guidance" / "metrics.csv"
     if g.exists():
         gm = pd.read_csv(g)
-        gm["gamma"] = [0.0 if v == "diff_phys" else float(v.split("Gx")[1]) for v in gm.variant]
+        gm["gamma"] = [float(v.split("Gx")[1].split("+")[0]) if "Gx" in v else 0.0 for v in gm.variant]
         gm = gm.sort_values("gamma")
         fig, ax1 = plt.subplots(figsize=(plotting.COL_W * 0.6, 1.8))
         xs = np.arange(len(gm))

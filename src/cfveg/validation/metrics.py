@@ -1,7 +1,7 @@
 """Metrics (all in NDVI units, masked so invalid/cloudy pixels never contribute).
 
-Accuracy:      masked MAE, RMSE; SSIM on frames with >= 70 % valid pixels (invalid pixels filled
-               with the prediction so they contribute no structure difference).
+Accuracy:      masked MAE, RMSE; SSIM on frames with >= 70 % valid pixels, averaged over 7x7 windows
+               centred on valid pixels (invalid pixels inside a window are filled with the prediction).
 Sharpness:     mean spatial gradient magnitude and high-frequency share of the 2-D power spectrum
                (power at radial frequency > 0.25 cycles/pixel, i.e. above half Nyquist), computed on
                the same near-cloud-free frames for prediction and observation. Ratio pred/obs < 1
@@ -46,7 +46,10 @@ def ssim_frames(pred: torch.Tensor, obs: torch.Tensor, mask: torch.Tensor, data_
         syy = F.conv2d(y * y, k) - my ** 2
         sxy = F.conv2d(x * y, k) - mx * my
         s = ((2 * mx * my + c1) * (2 * sxy + c2)) / ((mx ** 2 + my ** 2 + c1) * (sxx + syy + c2))
-        vals.append(s.mean().item())
+        r = k.shape[-1] // 2
+        mc = m[r:-r, r:-r]                       # only windows centred on a valid observed pixel count
+        if mc.sum() > 0:
+            vals.append(((s[0, 0] * mc).sum() / mc.sum()).item())
     return vals
 
 

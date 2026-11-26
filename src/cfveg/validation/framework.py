@@ -49,9 +49,13 @@ def observed_change(cube, cfg, l: int, yi: int, t0: int, oy: int, ox: int) -> np
     return seq[K:] - last[None]
 
 
-def cross_year_proxy(cube, cfg, l: int, yi: int, t0: int, oy: int, ox: int, fc_change: dict) -> dict:
+def cross_year_proxy(cube, cfg, l: int, yi: int, t0: int, oy: int, ox: int, fc_change: dict,
+                     model_anom: np.ndarray | None = None) -> dict:
     """fc_change: name -> forecast change [H,P,P] relative to the forecast start (last_ndvi).
-    Returns MAE of each forecast change against the mean observed change in non-drought other years."""
+    Returns MAE of each forecast change against the mean observed change in non-drought other years.
+    With model_anom ([H,P,P] = observed-weather forecast minus normal forecast), also returns the
+    OBSERVED anomaly of this year (observed change minus the reference change) and the model anomaly
+    on the same pixels (observation-based agreement check, red-team C1)."""
     others = [y for y in range(len(cube.years)) if y != yi and not window_is_drought(cube, cfg, l, y, t0)]
     if not others:
         return {"xp_n_years": 0}
@@ -63,6 +67,13 @@ def cross_year_proxy(cube, cfg, l: int, yi: int, t0: int, oy: int, ox: int, fc_c
     for k, v in fc_change.items():
         out[f"xp_mae_{k}"] = float(np.abs(v[ok] - ref[ok]).mean())
     out["xp_ref_mean_change"] = float(ref[ok].mean())
+    if model_anom is not None:
+        this = observed_change(cube, cfg, l, yi, t0, oy, ox)
+        ok2 = ok & np.isfinite(this)
+        out["xp_n_pix_anom"] = int(ok2.sum())
+        if ok2.sum() > 0:
+            out["xp_obs_anom"] = float((this[ok2] - ref[ok2]).mean())
+            out["xp_model_anom"] = float(model_anom[ok2].mean())
     return out
 
 
@@ -71,14 +82,24 @@ def unit_features(cube, cfg, l: int, yi: int, t0: int, oy: int, ox: int, P: int 
     K, H = cfg["window"]["context"], cfg["window"]["horizon"]
     P = P or cfg["window"]["patch"]
     seq = np.asarray(cube.ndvi[l, yi, t0:t0 + K + H, oy:oy + P, ox:ox + P], dtype=np.float32)
-    fm = _nanmean(seq.reshape(K + H, -1), axis=1)            # frame means
+    fm = _nanmean(seq.reshape(K + H, -1), axis=1)            # frame means (covariates only)
     lc = cube.lcg[l, oy:oy + P, ox:ox + P]
+    pre_pix, post_pix, msk = did_pixels(seq, K)
     return {
-        "pre": _nanmean(fm[K - 2:K]), "post": _nanmean(fm[K:]),
+        # pre/post on a COMMON pixel set (pixels observed both before and after the forecast start)
+        "pre": float(pre_pix[msk].mean()) if msk.any() else np.nan,
+        "post": float(post_pix[msk].mean()) if msk.any() else np.nan,
         "ctx_level": _nanmean(fm[:K]), "ctx_trend": _nanmean(fm[K - 3:K]) - _nanmean(fm[:3]),
         "elev": float(np.nanmean(cube.static[l, 0, oy:oy + P, ox:ox + P])), "lat": float(cube.meta["lat"][l]),
         "f_forest": float((lc == 0).mean()), "f_grass": float((lc == 1).mean()), "f_crop": float((lc == 2).mean()),
     }
+
+
+def did_pixels(seq: np.ndarray, K: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Per-pixel pre (mean of last 2 context bins) and post (horizon mean), and the common valid mask."""
+    pre = _nanmean(seq[K - 2:K], axis=0)
+    post = _nanmean(seq[K:], axis=0)
+    return pre, post, np.isfinite(pre) & np.isfinite(post)
 
 
 COVS = ["ctx_level", "ctx_trend", "elev", "lat", "f_forest", "f_grass", "f_crop"]
@@ -88,9 +109,8 @@ def covariate_scale(cube, cfg) -> tuple[pd.Series, pd.Series]:
     """Mean/std of matching covariates over TRAIN windows (train locations x train years)."""
     from ..data.dataset import make_windows
 
-    w = make_windows(cube, cfg, "train", stride=4, quadrants=False)
-    P = cube.ndvi.shape[-1]
-    df = pd.DataFrame([unit_features(cube, cfg, *map(int, r[:3]), 0, 0, P) for r in w])
+    w = make_windows(cube, cfg, "train", stride=4, quadrants=True)   # same unit size as matching
+    df = pd.DataFrame([unit_features(cube, cfg, *map(int, r)) for r in w])
     return df[COVS].mean(), df[COVS].std().replace(0, 1.0)
 
 
@@ -100,7 +120,12 @@ def smd(t: pd.DataFrame, c: pd.DataFrame) -> pd.Series:
 
 
 def natural_experiment(cube, cfg, effects: pd.DataFrame, caliper: float = 0.5, n_controls: int = 3) -> dict:
-    """effects: table from scripts/effects.py (test windows). Returns dict of DataFrames/metrics."""
+    """effects: table from scripts/effects.py (test windows). Returns dict of DataFrames/metrics.
+    Controls must have near-typical weather (ScenarioBuilder.is_normal), not merely 'not drought'.
+    The model effect is averaged over the same pixels as the DiD (column dON_did_*), if available."""
+    from ..data.scenarios import ScenarioBuilder
+
+    sb = ScenarioBuilder(cube, cfg)
     P = cfg["window"]["patch"]
     mu, sd = covariate_scale(cube, cfg)
     yrs = list(cube.years)
@@ -115,7 +140,7 @@ def natural_experiment(cube, cfg, effects: pd.DataFrame, caliper: float = 0.5, n
             continue
         cands = []
         for cl in pool_locs:
-            if cl == r.loc or window_is_drought(cube, cfg, cl, yi, int(r.t0)):
+            if cl == r.loc or not sb.is_normal(cl, yi, int(r.t0)):
                 continue
             for oy in range(0, full - P + 1, P):
                 for ox in range(0, full - P + 1, P):
@@ -136,8 +161,10 @@ def natural_experiment(cube, cfg, effects: pd.DataFrame, caliper: float = 0.5, n
         did = (tf["post"] - tf["pre"]) - float((ctrl.post - ctrl.pre).mean())
         t_rows.append(tf)
         c_rows.extend(ctrl.to_dict("records"))
-        pairs.append({"loc": r.loc, "year": r.year, "t0": r.t0, "did": did, "model_mean": r.dON_mean,
-                      "model_q05": r.dON_q05, "model_q95": r.dON_q95, "n_controls": len(good),
+        pre_ = "dON_did" if hasattr(r, "dON_did_mean") and np.isfinite(r.dON_did_mean) else "dON"
+        pairs.append({"loc": r.loc, "year": r.year, "t0": r.t0, "did": did, "model_mean": getattr(r, f"{pre_}_mean"),
+                      "model_q05": getattr(r, f"{pre_}_q05"), "model_q95": getattr(r, f"{pre_}_q95"),
+                      "model_pixels": pre_, "n_controls": len(good),
                       "match_dist": float(dist.values[good].mean())})
     pairs_df = pd.DataFrame(pairs)
     res = {"n_treated_total": int(len(treated)), "n_matched": int(len(pairs_df))}
@@ -214,4 +241,36 @@ def placebos(effects: pd.DataFrame, n_perm: int = 2000, seed: int = 0) -> dict:
         out["perm_p_one_sided"] = float((np.sum(perm <= real) + 1) / (len(perm) + 1))
     out["crn_var_ratio"] = float(effects.var_crn.mean() / effects.var_ind.mean()) if effects.var_ind.mean() > 0 \
         else float("nan")
+    return out
+
+
+def anomaly_agreement(effects: pd.DataFrame, n_boot: int = 1000, seed: int = 0) -> dict:
+    """Observation-based check (red-team C1): does the model's weather-driven anomaly
+    (observed-weather forecast minus normal forecast) track the OBSERVED anomaly (observed change minus
+    the mean change in non-drought other years at the same place and bins)? Correlation and slope with
+    95 % bootstrap CIs over locations."""
+    d = effects.dropna(subset=["xp_obs_anom", "xp_model_anom"]) if "xp_obs_anom" in effects else effects.iloc[:0]
+    out = {"anom_n": int(len(d))}
+    if len(d) < 10 or d.xp_model_anom.std() == 0:
+        return out
+    rng = np.random.default_rng(seed)
+    locs = d["loc"].unique()
+
+    def stats(df):
+        c = np.corrcoef(df.xp_model_anom, df.xp_obs_anom)[0, 1]
+        slope = np.polyfit(df.xp_model_anom, df.xp_obs_anom, 1)[0]
+        return c, slope
+
+    c, sl = stats(d)
+    bs = []
+    for _ in range(n_boot):
+        pick = rng.choice(locs, len(locs))
+        dd = pd.concat([d[d["loc"] == lo] for lo in pick])
+        if dd.xp_model_anom.std() > 0:
+            bs.append(stats(dd))
+    bs = np.array(bs)
+    out.update({"anom_corr": float(c), "anom_corr_lo95": float(np.percentile(bs[:, 0], 2.5)),
+                "anom_corr_hi95": float(np.percentile(bs[:, 0], 97.5)), "anom_slope": float(sl),
+                "anom_mean_obs_drought": float(d.loc[d.drought == 1, "xp_obs_anom"].mean()) if (d.drought == 1).any() else np.nan,
+                "anom_mean_model_drought": float(d.loc[d.drought == 1, "xp_model_anom"].mean()) if (d.drought == 1).any() else np.nan})
     return out

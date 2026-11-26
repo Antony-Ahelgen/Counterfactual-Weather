@@ -14,7 +14,9 @@ Pre-registered selection rules (fixed before any result was seen; validation spl
   lambda: among sweep scales, the one with the lowest summed violation rate (rate+phen+mono) whose
           validation CRPS is within 5 % of the best validation CRPS; ties -> smaller scale.
   gamma : among {0, 0.003, 0.01, 0.03, 0.1}, the largest gamma whose validation CRPS is within 2 % of
-          gamma=0's CRPS (guidance should fix physics without costing accuracy); ties -> smaller.
+          gamma=0's CRPS (guidance should fix physics without costing accuracy); swept with projection (+P)
+          as in the reported variant. Amended after the code review, before any real-data result existed.
+  All test variants use the same ensemble size (12 members).
 """
 from __future__ import annotations
 
@@ -95,10 +97,11 @@ def choose_lambda(val_metrics: pd.DataFrame) -> float:
 
 
 def choose_gamma(val_metrics: pd.DataFrame) -> float:
-    base = val_metrics[val_metrics.variant == "diff_phys"].iloc[-1].crps
+    """Swept WITH projection, because the reported variant is +G+P (red-team minor)."""
+    base = val_metrics[val_metrics.variant == "diff_phys+P"].iloc[-1].crps
     ok = [0.0]
     for g in GAMMAS:
-        r = val_metrics[val_metrics.variant == f"diff_phys+Gx{g}"]
+        r = val_metrics[val_metrics.variant == f"diff_phys+Gx{g}+P"]
         if len(r) and r.iloc[-1].crps <= 1.02 * base:
             ok.append(g)
     return max(ok)
@@ -148,8 +151,8 @@ def main() -> None:
     if not g_f.exists():
         log("stage 5: guidance sweep (validation)")
         run(["scripts/eval_all.py", "--preset", p, *SMOKE, "--split", "val", "--tag", "val_guidance", "--members", "8",
-             "--n_windows", str(a.val_windows), "--reference", "diff_phys", "--variants", "diff_phys"] +
-            [f"diff_phys+Gx{g}" for g in GAMMAS], ROOT / "runs" / "eval_val_guidance.log")
+             "--n_windows", str(a.val_windows), "--reference", "diff_phys+P", "--variants", "diff_phys+P"] +
+            [f"diff_phys+Gx{g}+P" for g in GAMMAS], ROOT / "runs" / "eval_val_guidance.log")
         m = pd.read_csv(RES / "val_guidance" / "metrics.csv")
         g = choose_gamma(m)
         g_f.write_text(json.dumps({"guidance_scale": g, "rule": "largest gamma with val CRPS within 2% of gamma=0",
@@ -159,12 +162,10 @@ def main() -> None:
     log("stage 6: test evaluation, effects, validation, demo")
     if not (RES / "test" / "metrics.csv").exists():
         run(["scripts/eval_all.py", "--preset", p, *SMOKE, "--split", "test", "--tag", "test", "--n_windows", "200",
-             "--members", "20", "--variants", "persistence", "climatology", "clim_anomaly", "det", "diff_plain",
-             "diff_phys+G+P"], ROOT / "runs" / "eval_test.log")
-        run(["scripts/eval_all.py", "--preset", p, *SMOKE, "--split", "test", "--tag", "test", "--n_windows", "200",
-             "--members", "10", "--variants", "diff_plain+G", "diff_plain+G+P", "diff_phys", "diff_phys+G",
-             "diff_phys_no_rate+G+P", "diff_phys_no_phen+G+P", "diff_phys_no_mono+G+P"],
-            ROOT / "runs" / "eval_test_ablation.log")
+             "--members", "12", "--variants", "observed", "persistence", "climatology", "clim_anomaly", "det",
+             "diff_plain", "diff_phys+G+P", "diff_plain+G", "diff_plain+G+P", "diff_phys", "diff_phys+G",
+             "diff_phys+P", "diff_phys_no_rate+G+P", "diff_phys_no_phen+G+P", "diff_phys_no_mono+G+P"],
+            ROOT / "runs" / "eval_test.log")
     if not (RES / "effects" / "effects_det_s0.csv").exists():
         run(["scripts/effects.py", "--preset", p, *SMOKE, "--members", "10", "--max_windows", "160"],
             ROOT / "runs" / "effects.log")

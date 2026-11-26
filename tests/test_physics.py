@@ -118,6 +118,38 @@ def test_scenarios_stress_levels(syn, cfg):
         d, _ = sb.drought(l, y, t0)
         ns.append(np.mean([sb.horizon_stress(w) for w in n]))
         ds_.append(np.mean([sb.horizon_stress(w) for w in d]))
-    assert abs(np.mean(ns)) < 0.75            # normal scenario ~ no stress
+    assert abs(np.mean(ns)) < 0.5             # normal scenario ~ no stress on average
     assert np.mean(ds_) > thr * 0.9           # drought scenario past (or at) the threshold
     assert all(d > n for n, d in zip(ns, ds_))
+
+
+def test_normal_analogs_are_near_typical(syn, cfg):
+    """Red-team M2: every analog in the normal pool must be near-typical, not merely 'not drought'."""
+    sb = ScenarioBuilder(syn, cfg)
+    for l, y, t0, _, _ in make_windows(syn, cfg, "test")[::3][:40]:
+        for (pl, py) in sb.normal_pool(l, t0):
+            s = sb._horizon_s(pl, py, t0)
+            assert abs(np.nanmean(s)) < sb.normal_max_s
+            assert (s >= sb.thr).sum() <= sb.normal_max_days
+
+
+def test_drought_fallback_reaches_threshold(syn, cfg):
+    sb = ScenarioBuilder(syn, cfg)
+    for l, y, t0, _, _ in make_windows(syn, cfg, "test")[::3][:40]:
+        d, method = sb.drought(l, y, t0)
+        if method == "perturbed_climatology":
+            assert sb.horizon_stress(d[0]) >= sb.thr
+
+
+def test_first_step_uses_true_gap(cfg):
+    """Red-team M4: a change spread over a 4-bin gap must be judged per day over 20 days, not 5."""
+    ph = _phys(cfg, r=0.01)            # 0.05 NDVI per 5-day bin
+    H = cfg["window"]["horizon"]
+    b = _batch(H, last=0.3)
+    x = ndvi_to_scaled(torch.full((1, H, 4, 4), 0.45))   # +0.15 in the first step
+    b["last_gap"] = torch.ones((1, 4, 4))
+    assert ph.violations(x, b, torch.zeros(1))["rate_frac"] > 0
+    b["last_gap"] = torch.full((1, 4, 4), 4.0)            # 20 days -> 0.0075/day < 0.01
+    assert ph.violations(x, b, torch.zeros(1))["rate_frac"] == 0.0
+    b["last_gap"] = torch.full((1, 4, 4), 99.0)           # never observed -> excluded
+    assert ph.violations(x, b, torch.zeros(1))["rate_frac"] == 0.0
