@@ -39,7 +39,20 @@ Not needed: the pipeline uses Open-Meteo era5_seamless (key-free).
 
 - 2026-11-26 17:20-18:15 extra download to 80 locations; 18:15-19:35 medium run; 18:55-20:05 lambda sweep (x3), gamma 0.1, eta 0 on validation; tuned test evaluated once. 20:10 tuned run promoted to results/ (fast archived in results/archive_fast69, untuned medium in results/medium). Paper/docs updated; audit OK.
 
-## Next (optional, if more time)
-1. Full run on all 160 locations (download remaining ~80, then `CFVEG_RESULTS=results/full python scripts/after_download.py`).
-2. Multiple seeds; larger ensembles; per-constraint retraining ablations; finer guidance grid beyond 0.1.
+- 2026-11-26 ~20:40 v2 improvement round started (owner chose the overnight plan; may stop and resume next day).
+  Design fixed before any v2 result: dev = 80 known locations (68 train / 12 val), FRESH test = 80 never-downloaded
+  locations (manifests/locations_v2.csv); 5000 steps x 3 seeds; lambda x3; no rate projection; gamma matched to the
+  observed envelope-violation rate on validation; post-hoc spread calibration on validation; test evaluated once.
+
+## Next  (RESUME HERE)
+1. Resume the v2 round (everything resumable: finished stages skipped, training resumes from checkpoints,
+   downloads skip finished locations). In PowerShell:
+   ```
+   cd C:\Users\senth\cfveg-project\counterfactual-vegetation-diffusion
+   .venv\Scripts\python scripts\run_v2.py > runs\run_v2_stdout.log 2>&1
+   ```
+   Progress: runs/pipeline.log ("v2:" lines), runs/download/s2_v2test.log, runs/v2/<model>_s<seed>/train.log.
+2. When "V2 PIPELINE DONE": review results/v2/RESULTS_SUMMARY.md (seed-robustness table), independent review,
+   then promote: `python scripts/promote_results.py --src results/v2 --archive-name medium_tuned`, update paper/docs
+   wording against the new numbers, audit, push.
 3. Authors: verify refs.bib, port paper to the Springer LNEE template, add related work on causal attribution.
