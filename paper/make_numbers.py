@@ -62,8 +62,9 @@ def main() -> None:
     vs = RES / "validation" / "validation_summary.csv"
     if vs.exists():
         for _, r in pd.read_csv(vs).iterrows():
+            dd = 0 if (r.metric.startswith("n_") or r.metric.endswith("_n")) else 3
             put("v", r.variant.split(" [")[0], r.metric + ("" if " [" not in r.variant else
-                                                          ("D" if "drought" in r.variant else "A")), r.value)
+                                                          ("D" if "drought" in r.variant else "A")), r.value, dd)
     ds = json.loads((RES / "data" / "data_summary.json").read_text())
     put("d", "nloc", None, ds["n_locations"], 0)
     for sp in ["train", "val", "test"]:

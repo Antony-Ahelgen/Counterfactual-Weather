@@ -21,9 +21,24 @@ histogram, bootstraps, DiD formula and matching, factual context weather in scen
 
 All selection and verdict rules were (re)fixed in code before any model was trained on the full real dataset.
 
+## Red-team review 2 (results and claims, fast run) — 2026-11-26
+
+| # | Severity | Finding | Action |
+|---|---|---|---|
+| C1 | critical | Physics diffusion's drought anomaly ≈2.7× the observed anomaly; summary did not say so. | RESULTS_SUMMARY now adds the observed reference and per-model ratios, states this is model bias; LIMITATIONS has a "Drought-effect bias" section. |
+| C2 | critical | "More physically consistent" over-claimed: guided/projected rates zero by construction and below observations; monotone metric in-sample. | Verdict capped at "partly supported" with explicit over-constraint wording; envelope and monotone reported separately; in-sample note added. |
+| M1 | major | CRPS flatters ensembles; MAE: deterministic best; physics costs accuracy vs unconstrained diffusion. | MAE paired tests added to the accuracy evidence with the ensemble caveat. |
+| M2 | major | Sharpness gain vs unconstrained diffusion marginal (≈4 %). | ≥10 % margin required -> "no meaningful difference". |
+| M3 | major | Small samples (10 test locations, 11 drought windows, 5 matched pairs, SMD 0.38), uncorrected tests. | "Statistical caveats" section; natural experiment marked uninformative under n < 10 or SMD > 0.25. |
+| M4 | major | Guidance scale at grid edge; calibration cost. | Stated in caveats and LIMITATIONS. |
+| M5 | major | Docs said preset cpu, 270 test windows, 8000 steps, 20 members, 160 locations. | Preset and window counts read from provenance/per-window files; LIMITATIONS/METHODS distinguish planned design from the reported run. |
+| mi | minor | Rate bounds vs observed 2.4 % exceedance; coupling identical to uncoupled; overconfident calibration; single seed. | Explained in LIMITATIONS; calibration verdict says "overconfident"; single-seed caveat. |
+
+Verdict-rule changes after this review only make verdicts stricter.
+
 ## Pending (final audit, Section 11 of the brief)
 - [x] Clean-checkout test (2026-11-26): fresh `git clone` + fresh venv (torch CPU + requirements.lock) -> `tasks.py test` 32 passed, `tasks.py smoke` OK. It caught a critical packaging bug: `.gitignore` rule `data/` also ignored `src/cfveg/data/`, so the data package had never been committed; fixed by anchoring to `/data/`.
 - [ ] Number audit on final docs (`scripts/audit_numbers.py`)
-- [ ] Leakage audit re-run
-- [ ] Red-team review 2 (results and claims)
-- [ ] Claim check in RESULTS_SUMMARY.md
+- [x] Leakage audit re-run: tests/test_leakage.py passes; review 2 confirmed disjoint 49/10/10 locations (test ≥0.47° from train), disjoint years, train-only fitted objects, guidance chosen on validation <!--noaudit-->
+- [x] Red-team review 2 (results and claims) — see above
+- [x] Claim check in RESULTS_SUMMARY.md (generated; every abstract claim has a verdict)

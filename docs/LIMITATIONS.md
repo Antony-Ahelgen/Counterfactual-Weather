@@ -7,7 +7,7 @@
 - The natural experiment relies on matching on observed covariates; unobserved differences between treated and control locations remain.
 
 ## Data
-- **Weather is coarse.** ERA5-Land is ~9 km and ERA5 (used for precipitation, radiation, ET0 via Open-Meteo `era5_seamless`) is ~25–31 km, while imagery is 20 m. Every pixel in a 640 m patch shares one weather sequence; within-patch variation must come from context imagery and static layers. We use 160 locations ≥0.3° apart (distinct weather cells) to give the model real weather variation, but the weather–vegetation relationship is learned from at most 160 weather series per year.
+- **Weather is coarse.** ERA5-Land is ~9 km and ERA5 (used for precipitation, radiation, ET0 via Open-Meteo `era5_seamless`) is ~25–31 km, while imagery is 20 m. Every pixel in a 640 m patch shares one weather sequence; within-patch variation must come from context imagery and static layers. The design uses 160 locations ≥0.3° apart (distinct weather cells; the reported fast run uses 69 of them) to give the model real weather variation, but the weather–vegetation relationship is learned from few weather series (49 training locations in the reported run).
 - **Precipitation and radiation come from ERA5 (0.25°), not ERA5-Land**, because Open-Meteo's `era5_land` daily product returns null for them. The CDS route would give native ERA5-Land values (needs a user key). <!--noaudit-->
 - **Stress index is SPEI-like, not SPEI.** It combines standardised 30-day anomalies of P−ET0, temperature, VPD and soil moisture against a per-location, per-day-of-year climatology from 2010–2019 + 2023 (val/test years excluded). Eleven reference years is a short climatology; extremes are less well estimated.
 - **Cloud masking uses the Sentinel-2 SCL layer only** (classes 4, 5, 6 kept). SCL misses some thin cloud, haze and shadow; this shows up as implausibly fast NDVI rises between composites and inflates the data-derived rate bounds (see results/data/data_summary.json).
@@ -17,10 +17,26 @@
 - **Land cover** is the 2021 WorldCover map applied to all years; land-cover change 2017–2023 is ignored.
 
 ## Model and compute
-- **CPU only** (no CUDA GPU): reduced preset (32×32 px patches = 640 m, 8 context + 8 target 5-day frames, ~0.9 M-parameter U-Net, 8000 training steps, 1 seed, 20 ensemble members). Results may change with larger models, longer training or more seeds. Single-seed results do not capture training variance; bootstrap intervals are over locations only.
-- Ablation models are trained with the same budget as the main models; differences smaller than the bootstrap intervals are not interpreted.
-- Monotonicity is trained on a hand-designed stress perturbation of the weather (fixed direction in feature space) applied to half of each batch.
-- Rate bounds are the 99.5th percentile of clean consecutive differences (both frames ≥95 % valid) per land-cover group; they are loose because of residual cloud contamination and real abrupt events (harvest, mowing).
+- **CPU only** (no CUDA GPU). Reported run (preset `fast`): 32×32 px patches (640 m), 8 context + 8 target 5-day
+  frames, ~0.9 M-parameter U-Net, **2500 training steps, 1 seed, 8 ensemble members**. The planned `cpu` preset
+  (8000 steps, 20 members) and the full pipeline were implemented but not run to completion. Results may change with
+  larger models, longer training or more seeds; single-seed results do not capture training variance.
+- Monotonicity is trained AND scored with the same hand-designed stress perturbation of the weather (fixed direction
+  in feature space), so the monotone-violation metric is in-sample for the physics models.
+- Rate bounds are the 99.5th percentile of clean consecutive differences (both frames ≥95 % valid) per land-cover
+  group; they are loose (residual cloud/haze, real harvest/mowing). The observations themselves exceed them in
+  about 2.4 % of valid steps (results/test/metrics.csv, `observed` row), more than the nominal 0.5 %, because the
+  observed series include less clean frames (any valid pixel counts, not only frames ≥95 % valid) and because
+  bounds are pooled per land-cover group.
+- Physics guidance enforces the same envelope and rate bounds that the violation metrics score, so zero violations
+  under guidance/projection hold by construction; below the observations' own rates they indicate over-constraint.
+
+## Drought-effect bias (main negative finding)
+- On drought windows the diffusion models' weather-driven anomaly is 1.7–2.7× the observed anomaly (physics models
+  largest), while the deterministic network matches it (docs/RESULTS_SUMMARY.md). The estimated drought losses of the
+  physics models are therefore biased high in this run and must not be read as attributable damage.
+- The natural experiment is uninformative here (5 matched pairs, covariate imbalance SMD 0.38). <!--noaudit: values from results/validation, quoted-->
+- The guidance scale was the largest candidate (grid edge) and guidance reduces interval coverage (calibration cost).
 
 ## Reduced-scale run actually reported (preset `fast`)
 - Owing to time constraints, the project owner chose (2026-11-26) a reduced-scale run on real data instead of the

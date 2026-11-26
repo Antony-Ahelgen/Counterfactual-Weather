@@ -1,7 +1,9 @@
 # Methods notes (adaptable into the paper)
 
-All numbers here are configuration values (configs/base.yaml, configs/presets/cpu.yaml). Results are in
-`docs/RESULTS_SUMMARY.md`, generated from `results/`.
+All numbers here are configuration values. They describe the **planned design** (configs/base.yaml,
+configs/presets/cpu.yaml). The **reported run** used preset `fast` (configs/presets/fast.yaml): 69 of the 160
+locations (those downloaded), re-split 49/10/10 before training, 2500 training steps, 8 ensemble members, guidance
+scale selected from {0, 0.01, 0.1}. Results are in `docs/RESULTS_SUMMARY.md`, generated from `results/`.
 
 ## 1 Data
 
