@@ -1,7 +1,7 @@
 """Build analysis-ready cube + train-only fitted objects + data summary + sanity figure.
 
   python scripts/build_data.py --preset cpu              # real data (after download_data.py)
-  python scripts/build_data.py --preset smoke --synthetic # SYNTHETIC cube for smoke tests
+  python scripts/build_data.py --preset smoke --smoke     # smoke run on the REAL test fixture
   python scripts/build_data.py --preset cpu --download    # run downloads first (resumable)
 Outputs: <processed>/cube/*, <processed>/stats.json, physics.json, clim.npy;
 results/data/{data_summary.json, drought_sensitivity.csv, sanity_timeseries.pdf} (+ provenance)
@@ -23,15 +23,14 @@ sys.path.insert(0, str(ROOT / "src"))
 from cfveg.data.cube import build_cube  # noqa: E402
 from cfveg.data.dataset import Cube, fit_norm_stats, make_windows  # noqa: E402
 from cfveg.data.stress import is_drought  # noqa: E402
-from cfveg.data.synthetic import make_synthetic_cube  # noqa: E402
 from cfveg.models.baselines import fit_pixel_climatology  # noqa: E402
 from cfveg.physics.constraints import fit_physics  # noqa: E402
 from cfveg.utils import plotting  # noqa: E402
 from cfveg.utils.provenance import load_preset, write_provenance  # noqa: E402
 
 
-def processed_dir(cfg: dict, synthetic: bool) -> Path:
-    return ROOT / ("data/smoke" if synthetic else cfg["data"]["processed_dir"])
+def processed_dir(cfg: dict, smoke: bool) -> Path:
+    return ROOT / ("data/smoke" if smoke else cfg["data"]["processed_dir"])
 
 
 def drought_stats(cube: Cube, cfg: dict, split: str, thr: float, min_days: int) -> dict:
@@ -42,7 +41,7 @@ def drought_stats(cube: Cube, cfg: dict, split: str, thr: float, min_days: int) 
     return {"n_windows": len(w), "drought_frac": float(np.mean(lab)) if lab else float("nan")}
 
 
-def sanity_figure(cube: Cube, cfg: dict, out: Path, synthetic: bool) -> None:
+def sanity_figure(cube: Cube, cfg: dict, out: Path, smoke: bool) -> None:
     plotting.setup()
     import matplotlib.pyplot as plt
 
@@ -80,7 +79,7 @@ def sanity_figure(cube: Cube, cfg: dict, out: Path, synthetic: bool) -> None:
     axes[2].set_ylabel("Stress index s")
     axes[2].set_ylim(-3, 3)
     axes[2].set_xlabel("Year (Mar–Oct only)")
-    title = f"{'SYNTHETIC ' if synthetic else ''}location {cube.meta['loc_id'][l]} " \
+    title = f"{'[smoke fixture] ' if smoke else ''}location {cube.meta['loc_id'][l]} " \
             f"({cube.meta['lat'][l]:.2f}N, {cube.meta['lon'][l]:.2f}E); grey = drought-labelled horizon bins"
     axes[0].set_title(title)
     plotting.save(fig, out)
@@ -89,13 +88,15 @@ def sanity_figure(cube: Cube, cfg: dict, out: Path, synthetic: bool) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--preset", default="cpu")
-    ap.add_argument("--synthetic", action="store_true")
+    ap.add_argument("--smoke", action="store_true", help="use the real-data test fixture")
     ap.add_argument("--download", action="store_true")
     a = ap.parse_args()
     cfg = load_preset(a.preset)
-    pdir = processed_dir(cfg, a.synthetic)
-    if a.synthetic:
-        make_synthetic_cube(pdir / "cube", n_loc=12, P=cfg["window"]["patch"], seed=0)
+    pdir = processed_dir(cfg, a.smoke)
+    if a.smoke:
+        import shutil
+
+        shutil.copytree(ROOT / "tests" / "fixtures" / "real_cube", pdir / "cube", dirs_exist_ok=True)
         res_dir = ROOT / "results" / "smoke"
     else:
         if a.download:
@@ -112,7 +113,7 @@ def main() -> None:
     (pdir / "physics.json").write_text(json.dumps(phys))
     np.save(pdir / "clim.npy", fit_pixel_climatology(cube, cfg, phys))
     res_dir.mkdir(parents=True, exist_ok=True)
-    summary = {"synthetic": bool(a.synthetic), "n_locations": len(cube.meta["loc_id"]),
+    summary = {"smoke_fixture": bool(a.smoke), "n_locations": len(cube.meta["loc_id"]),
                "split_counts": pd.Series(cube.meta["split"]).value_counts().to_dict(),
                "dropped_locations": cube.meta["dropped"],
                "valid_pixel_frac": float(np.isfinite(cube.ndvi).mean()),
@@ -123,7 +124,7 @@ def main() -> None:
                                                  cfg["drought"]["min_stressed_days"])
     f = res_dir / "data_summary.json"
     f.write_text(json.dumps(summary, indent=1))
-    write_provenance(f, config=cfg, extra={"synthetic": bool(a.synthetic)})
+    write_provenance(f, config=cfg, extra={"smoke_fixture": bool(a.smoke)})
     rows = []
     for thr in [0.5, 0.75, 1.0, 1.25, 1.5]:
         for md in [20, 30, 40]:
@@ -134,7 +135,7 @@ def main() -> None:
     f2 = res_dir / "drought_sensitivity.csv"
     pd.DataFrame(rows).to_csv(f2, index=False)
     write_provenance(f2, config=cfg["drought"])
-    sanity_figure(cube, cfg, res_dir / "sanity_timeseries", a.synthetic)
+    sanity_figure(cube, cfg, res_dir / "sanity_timeseries", a.smoke)
     print(json.dumps({k: v for k, v in summary.items() if k.startswith("windows")}, indent=1))
 
 

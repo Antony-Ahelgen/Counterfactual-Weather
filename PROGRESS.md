@@ -23,3 +23,4 @@ Not needed: the pipeline uses Open-Meteo era5_seamless (key-free).
 
 ## Next
 Phase 1: location sampling (WorldCover filter) → S2 download + 5-day NDVI composites → weather → static → cubes → splits → stress index/drought labels → dataset class → tests.
+- 2026-11-26 00:40 USER INSTRUCTION: never use synthetic data (no oracle, tests/smoke must use a real-data fixture). Synthetic generator to be removed once >=20 real locations are downloaded. Ask user for any access needed.

@@ -3,7 +3,6 @@ import pytest
 import torch
 
 from cfveg.data.dataset import Cube, WindowDataset, fit_norm_stats, make_windows
-from cfveg.data.synthetic import make_synthetic_cube
 from cfveg.models.diffusion import Diffusion, cosine_alpha_bar
 from cfveg.models.train import collate
 from cfveg.models.unet import build_unet
@@ -11,10 +10,8 @@ from cfveg.utils.provenance import load_preset, seed_everything
 
 
 @pytest.fixture(scope="module")
-def setup(tmp_path_factory):
-    p = tmp_path_factory.mktemp("cube")
-    make_synthetic_cube(p, n_loc=8, P=32, seed=2)
-    cube = Cube.load(p)
+def setup(real_cube):
+    cube = real_cube
     cfg = load_preset("smoke")
     stats = fit_norm_stats(cube, cfg)
     ds = WindowDataset(cube, cfg, make_windows(cube, cfg, "train"), stats)

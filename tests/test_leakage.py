@@ -11,7 +11,6 @@ import pytest
 
 from cfveg.data.dataset import Cube, fit_norm_stats, make_windows
 from cfveg.data.scenarios import ScenarioBuilder
-from cfveg.data.synthetic import make_synthetic_cube
 from cfveg.models.baselines import fit_pixel_climatology
 from cfveg.physics.constraints import fit_physics
 from cfveg.utils.provenance import load_preset
@@ -23,10 +22,8 @@ def cfg():
 
 
 @pytest.fixture(scope="module")
-def cubes(tmp_path_factory, cfg):
-    p = tmp_path_factory.mktemp("cube")
-    make_synthetic_cube(p, n_loc=10, P=32, seed=3)
-    clean = Cube.load(p, mmap=False)
+def cubes(real_cube, cfg):
+    clean = copy.deepcopy(real_cube)
     bad = copy.deepcopy(clean)
     bad.ndvi = np.array(bad.ndvi, dtype=np.float32)
     held_loc = bad.split != "train"

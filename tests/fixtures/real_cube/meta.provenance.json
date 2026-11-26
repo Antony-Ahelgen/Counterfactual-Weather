@@ -1,0 +1,22 @@
+{
+  "result_file": "meta.json",
+  "command": "python.exe scripts/make_fixture.py",
+  "git_commit": "c465818450d74e94480247f243bce1c09b829cee-dirty",
+  "seed": null,
+  "config": null,
+  "timestamp": "2026-11-26T14:20:48",
+  "python": "3.14.2",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "locations": [
+    "L0000",
+    "L0002",
+    "L0004",
+    "L0006",
+    "L0007",
+    "L0008",
+    "L0005",
+    "L0014",
+    "L0003",
+    "L0033"
+  ]
+}

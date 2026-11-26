@@ -9,15 +9,12 @@ from cfveg.data.dataset import (Cube, WindowDataset, fill_context, fit_norm_stat
                                 ndvi_to_scaled, scaled_to_ndvi)
 from cfveg.data.sentinel2 import bin_index, boa_offset, composite, ndvi_from_dn
 from cfveg.data.stress import daily_anomalies, is_drought
-from cfveg.data.synthetic import make_synthetic_cube
 from cfveg.utils.provenance import load_preset
 
 
 @pytest.fixture(scope="module")
-def syn(tmp_path_factory):
-    p = tmp_path_factory.mktemp("cube")
-    make_synthetic_cube(p, n_loc=10, P=32, seed=1)
-    return Cube.load(p)
+def syn(real_cube):
+    return real_cube
 
 
 @pytest.fixture(scope="module")

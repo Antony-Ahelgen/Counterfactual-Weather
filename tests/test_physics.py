@@ -4,7 +4,6 @@ import torch
 
 from cfveg.data.dataset import Cube, WindowDataset, fit_norm_stats, make_windows, ndvi_to_scaled
 from cfveg.data.scenarios import ScenarioBuilder
-from cfveg.data.synthetic import make_synthetic_cube
 from cfveg.models.train import collate
 from cfveg.physics.constraints import Physics, fit_physics
 from cfveg.physics.monotonicity import stress_weather
@@ -98,10 +97,8 @@ def test_projection_enforces_bounds(cfg):
 
 
 @pytest.fixture(scope="module")
-def syn(tmp_path_factory):
-    p = tmp_path_factory.mktemp("cube")
-    make_synthetic_cube(p, n_loc=12, P=32, seed=4)
-    return Cube.load(p)
+def syn(real_cube):
+    return real_cube
 
 
 def test_fit_physics_reasonable(syn, cfg):
