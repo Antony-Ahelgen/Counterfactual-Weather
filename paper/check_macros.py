@@ -15,7 +15,7 @@ for kind, pre in [("R", "r"), ("V", "v")]:
 for a in re.findall(r"\\D\{([^}]*)\}", tex):
     if f"d@{a}" not in defined:
         missing.append(f"\\D{{{a}}}")
-notes = len(re.findall(r"\\draftnote\{", tex)) - 1   # minus the \newcommand definition
+notes = len(re.findall(r"\\draftnote\{", tex))   # the \newcommand definition does not match this pattern
 print("missing macros:", missing or "none")
 print("open draft notes:", notes)
 sys.exit(1 if missing else 0)
