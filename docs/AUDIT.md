@@ -22,7 +22,7 @@ histogram, bootstraps, DiD formula and matching, factual context weather in scen
 All selection and verdict rules were (re)fixed in code before any model was trained on the full real dataset.
 
 ## Pending (final audit, Section 11 of the brief)
-- [ ] Clean-checkout test
+- [x] Clean-checkout test (2026-11-26): fresh `git clone` + fresh venv (torch CPU + requirements.lock) -> `tasks.py test` 32 passed, `tasks.py smoke` OK. It caught a critical packaging bug: `.gitignore` rule `data/` also ignored `src/cfveg/data/`, so the data package had never been committed; fixed by anchoring to `/data/`.
 - [ ] Number audit on final docs (`scripts/audit_numbers.py`)
 - [ ] Leakage audit re-run
 - [ ] Red-team review 2 (results and claims)
