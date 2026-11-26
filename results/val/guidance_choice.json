@@ -1,0 +1,10 @@
+{
+ "guidance_scale": 0.1,
+ "rule": "largest gamma with val CRPS within 2% of gamma=0 (with projection)",
+ "candidates": [
+  0.0,
+  0.01,
+  0.1
+ ],
+ "preset": "fast"
+}
