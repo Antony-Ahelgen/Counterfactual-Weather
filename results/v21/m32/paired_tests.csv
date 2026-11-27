@@ -1,0 +1,3 @@
+reference,other,metric,diff,lo,hi,p_two_sided,seed
+diff_phys+G+P+Cal,diff_phys_G_P,mae,0.006444888741587634,0.0021923858402913233,0.011064896697623911,0.0,0
+diff_phys+G+P+Cal,diff_phys_G_P,crps,0.002735955254588293,-0.0003762594055246936,0.006077414378207263,0.124,0

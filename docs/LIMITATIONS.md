@@ -41,6 +41,15 @@
   scale chosen on validation by a pre-registered rule (envelope-violation rate closest to the observations' among
   γ within 2 % of the unguided CRPS) → γ = 0; post-hoc spread factors (1.10–1.22) fitted on validation per seed and
   model; deterministic DDIM. The test split was evaluated once with these choices.
+- **Confirmation run `v21`** (`results/v21/CONFIRMATION.md`): the v2 models evaluated once on the 12 reserved fresh
+  test locations downloaded by 18:55 IST on 2026-11-27 (design and validation-fitted calibration committed before any
+  result). Replicates physics consistency (supported, 3 seeds), sharper than det (supported, 3 seeds), CRPS partly.
+  Pre-registered calibrated model (bias + spread, 32 members): mixed (90 % coverage 0.811 / 0.809 / 0.794); the bias
+  correction fitted on 2020 did not transfer to 2021-22. Exploratory: uncorrected 32-member ensembles meet the
+  calibration rule in all seeds (seeds 1-2 added after seeing seed 0). Only 12 locations: wide uncertainty.
+- **Evaluation ensemble size.** The calibration rule scores the empirical 5-95 % interval of the members; with 8
+  members this interval cannot reach 90 % coverage even for a calibrated ensemble ((M-1)/(M+1) = 78 % for [min, max]),
+  so the main-run calibration verdict is partly an ensemble-size effect.
 - **Reference runs (kept, not tuned on test):** `results/archive_medium_tuned/` (80 locations, 56/12/12, λ×3,
   γ = 0.1, 1 seed), `results/medium/` (same data, untuned) and `results/archive_fast69/` (69 locations). Their
   conclusions agree in direction with the main run; the per-run numbers are in each folder's `RESULTS_SUMMARY.md`.

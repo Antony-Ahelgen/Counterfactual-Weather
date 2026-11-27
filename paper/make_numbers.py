@@ -31,6 +31,7 @@ def main() -> None:
              r"\newcommand{\R}[2]{\@ifundefined{r@#1@#2}{\textbf{??}}{\csname r@#1@#2\endcsname}}",
              r"\newcommand{\V}[2]{\@ifundefined{v@#1@#2}{\textbf{??}}{\csname v@#1@#2\endcsname}}",
              r"\newcommand{\D}[1]{\@ifundefined{d@#1}{\textbf{??}}{\csname d@#1\endcsname}}",
+             r"\newcommand{\CF}[2]{\@ifundefined{c@#1@#2}{\textbf{??}}{\csname c@#1@#2\endcsname}}",
              r"\makeatother"]
 
     def put(prefix, a, b, v, d=3):
@@ -113,6 +114,19 @@ def main() -> None:
         dj = json.loads(demo.read_text())
         put("d", "crnratio", None, dj["crn_variance_ratio_pixel"])
         put("d", "demodelta", None, dj["area_mean_delta_crn"], 4)
+    # v2.1 confirmation on reserved fresh test locations (results/v21): \C{<variant>[_m32]}{<metric>s<seed>}
+    v21 = ROOT / "results" / "v21"
+    for sub, suf in [("test", ""), ("m32", "_m32")]:
+        f = v21 / sub / "metrics.csv"
+        if f.exists():
+            for _, r in pd.read_csv(f).iterrows():
+                for k in ["mae", "crps", "cov90", "cov50", "spread_skill", "phen_frac", "mono_frac"]:
+                    if k in r and r[k] == r[k]:
+                        put("c", r.variant.replace("+", "_") + suf, f"{k}s{int(r.seed)}", r[k],
+                            2 if k == "spread_skill" else 3)
+    mj = v21 / "data" / "data_summary.json"
+    if mj.exists():
+        put("c", "nloctest", "all", json.loads(mj.read_text())["split_counts"].get("test"), 0)
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"wrote paper/numbers.tex ({len(lines)} lines)")
 

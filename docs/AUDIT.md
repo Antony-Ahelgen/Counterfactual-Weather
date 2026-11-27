@@ -73,6 +73,17 @@ Verdict-rule changes after this review only make verdicts stricter.
   drought-effect bias of physics models 1.3× → 1.8×. Promoted to results/ (previous main run in
   results/archive_medium_tuned/).
 
+## v2.1 confirmation — 2026-11-27 18:00-19:25 (owner request: best result by 20:30)
+- Test set already used, so improvements were designed on validation and confirmed once on the 12 reserved fresh
+  locations. Commits before any result: calibration rule (scripts/fit_calibration.py; first draft targeted 90 %
+  coverage directly, replaced after a validation smoke test showed it over-disperses small ensembles), the design
+  (scripts/run_v21.py, configs/presets/v21.yaml) and the report rule (scripts/report_v21.py, C5 rule unchanged).
+- Omission fixed: the loss-only model diff_phys, needed by the physics-consistency rule, was missing from the v21
+  variant list (verdict capped at "partly" by construction); it was evaluated afterwards for all seeds.
+- Exploratory, labelled as such: uncorrected 32-member model for seeds 1-2 (added after seeing seed 0).
+- Outcome: physics consistency and sharper-than-det supported in all seeds; calibrated model mixed (seed 2 0.794);
+  uncorrected 32-member ensembles within the calibration rule in all seeds (exploratory).
+
 ## Pending (final audit, Section 11 of the brief)
 - [x] Clean-checkout test (2026-11-26): fresh `git clone` + fresh venv (torch CPU + requirements.lock) -> `tasks.py test` 32 passed, `tasks.py smoke` OK. It caught a critical packaging bug: `.gitignore` rule `data/` also ignored `src/cfveg/data/`, so the data package had never been committed; fixed by anchoring to `/data/`.
 - [x] Number audit (`scripts/audit_numbers.py`): OK on 2026-11-26 over docs/*.md and paper/*.tex; re-run automatically by `scripts/promote_results.py` and `tasks.py paper-assets` after every results change

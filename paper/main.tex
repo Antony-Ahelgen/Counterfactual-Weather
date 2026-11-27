@@ -33,8 +33,10 @@ climatology and a deterministic network, but this comparison favours ensembles o
 deterministic network has the lowest MAE (\R{det}{mae} vs.\ \R{diff_phys_G_P}{mae}) and the highest SSIM
 (\R{det}{ssim} vs.\ \R{diff_phys_G_P}{ssim}). The learned physics losses consistently reduce envelope and
 monotonicity violations in all seeds, to below the observations' own rates for envelope and rate bounds, at a small
-accuracy cost relative to unconstrained diffusion. Ensembles remain overconfident (90\,\% coverage \R{diff_phys_G_P}{cov90}) even after a
-spread correction fitted on validation data. The model's drought anomaly correlates weakly but positively with the
+accuracy cost relative to unconstrained diffusion; both results replicate on \CF{nloctest}{all} further reserved test locations. With 8
+members, ensembles appear overconfident (90\,\% coverage \R{diff_phys_G_P}{cov90}); on the reserved locations,
+32-member ensembles reach 90\,\% coverage of \CF{diff_phys_G_P_m32}{cov90s2}--\CF{diff_phys_G_P_m32}{cov90s1} in all
+seeds (exploratory), so much of the apparent overconfidence reflects the small ensemble size. The model's drought anomaly correlates weakly but positively with the
 observed anomaly, yet the physics models estimate drought losses about \D{anom_ratio_diff_phys_G_P} times larger
 than observed, and the matched natural experiment is unbalanced. Observation-based validation therefore provides
 \emph{insufficient evidence} for credible drought-effect estimates in this setting.
@@ -176,8 +178,28 @@ establish credibility.
 \paragraph{Calibration.} Ensembles remain overconfident after the validation-fitted spread correction: the central
 90\,\% interval covers \R{diff_phys_G_P}{cov90} of observations (seeds 1 and 2: \R{diff_phys_G_P}{cov90s1},
 \R{diff_phys_G_P}{cov90s2}) and the spread--skill ratio is \R{diff_phys_G_P}{spread_skill}. A spread--skill ratio
-close to 1 with low coverage suggests that the remaining miscalibration comes from bias and heavy-tailed errors
-rather than from too little spread alone.
+close to 1 with low coverage points to a property of small ensembles: the empirical 5--95\,\% interval of $M$
+members cannot reach nominal coverage even for a perfectly calibrated ensemble (the full range $[\min,\max]$ covers on
+average only $(M-1)/(M+1)$, i.e.\ 78\,\% for $M=8$). The pre-registered calibration verdict uses 8 members and is
+therefore partly a consequence of ensemble size (Section~\ref{sec:confirm}).
+
+\section{Confirmation on reserved test locations}\label{sec:confirm}
+After the main evaluation, we evaluated the same models once on \CF{nloctest}{all} further fresh test locations that
+had been left out at the main deadline and were seen by no model. The design, including a post-hoc calibration
+(per-lead bias correction and spread factor fitted on validation data), was committed before any result. With 8
+members and no correction, the replication reproduces the main findings: the physical-consistency claim is
+supported in all three seeds, the physics model is closer to the observed sharpness than the deterministic network in
+all three seeds, CRPS accuracy is again only partly supported, and 90\,\% coverage is again low
+(\CF{diff_phys_G_P}{cov90s0}, \CF{diff_phys_G_P}{cov90s1}, \CF{diff_phys_G_P}{cov90s2}). The pre-registered calibrated
+model with 32 members reaches 90\,\% coverage of \CF{diff_phys_G_P_Cal_m32}{cov90s0}, \CF{diff_phys_G_P_Cal_m32}{cov90s1}
+and \CF{diff_phys_G_P_Cal_m32}{cov90s2}; it meets the calibration criterion in two of three seeds, so the verdict is
+mixed. The bias correction, fitted on the validation year, did not transfer to the test years: it increased CRPS and
+MAE. In an exploratory comparison (two of the three seeds added after seeing the first), the \emph{uncorrected}
+model with 32 members reaches 90\,\% coverage of \CF{diff_phys_G_P_m32}{cov90s0}, \CF{diff_phys_G_P_m32}{cov90s1} and
+\CF{diff_phys_G_P_m32}{cov90s2} with spread--skill ratios \CF{diff_phys_G_P_m32}{spread_skills2}--\CF{diff_phys_G_P_m32}{spread_skills1},
+within the calibration criterion in all seeds. This indicates that the ensembles are reasonably calibrated and that
+the main limitation was the ensemble size used for evaluation; because this comparison was not the pre-registered
+primary analysis and uses only \CF{nloctest}{all} locations, we report it as exploratory.
 
 \section{Limitations}
 The drought effect is a model-based estimate, credible only if the model captures how weather drives vegetation and no
@@ -197,7 +219,8 @@ network in CRPS on fresh test locations, and its learned constraint losses consi
 implausible behaviour across three training seeds without forcing violations to zero. The central hypothesis of credible
 drought-attributable loss estimates is not established: model and observed drought anomalies agree in direction, but
 the constrained models overstate drought losses (by a factor that differed between our runs), the natural experiment
-is unbalanced, and ensembles remain overconfident. The validation framework, in particular the observation-based
+is unbalanced. Apparent overconfidence of 8-member ensembles largely disappears with 32 members on reserved test
+locations, although a pre-registered bias correction did not transfer across years. The validation framework, in particular the observation-based
 anomaly and proxy checks, was essential to detect this; input-based placebos alone would have suggested success.
 Larger training sets with more drought events, larger models trained longer, and constraints calibrated against
 observed rather than idealised responses are the most important next steps.

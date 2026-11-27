@@ -1,0 +1,12 @@
+{
+  "result_file": "metrics_ci.csv",
+  "command": "python.exe scripts/eval_all.py --preset v21 --split test --tag m32_s1 --n_windows 100 --members 32 --seed 1 --reference diff_phys+G+P+Cal --variants diff_phys+G+P+Cal",
+  "git_commit": "c34291ad7cc49fcb2b7475df468f38e8d691dea6",
+  "seed": 1,
+  "config": null,
+  "timestamp": "2026-11-27T19:07:38",
+  "python": "3.14.2",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "split": "test",
+  "bootstrap": "1000 x locations"
+}

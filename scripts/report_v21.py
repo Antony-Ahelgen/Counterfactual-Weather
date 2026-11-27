@@ -32,7 +32,9 @@ def merge(src_tags: list[tuple[int, str]], dst: str) -> None:
                 new = pd.read_csv(f)
                 if (d / f.name).exists():
                     old = pd.read_csv(d / f.name)
-                    new = pd.concat([old[old.seed != seed], new], ignore_index=True)
+                    col = "variant" if "variant" in old else "other"
+                    keep = ~(old.seed.isin(new.seed.unique()) & old[col].isin(new[col].unique()))
+                    new = pd.concat([old[keep], new], ignore_index=True)
                 new.to_csv(d / f.name, index=False)
             elif f.is_file() and f"_s{seed}" in f.name:
                 shutil.copy2(f, d / f.name)
@@ -49,7 +51,7 @@ def c5(r) -> str:
 def main() -> None:
     os.environ["CFVEG_RESULTS"] = str(RES)
     merge([(1, "test_s1"), (2, "test_s2")], "test")
-    merge([(0, "m32_s0"), (1, "m32_s1"), (2, "m32_s2")], "m32")
+    merge([(0, "m32_s0"), (1, "m32_s1"), (2, "m32_s2"), (1, "m32raw_s1"), (2, "m32raw_s2")], "m32")
     for seed in [1, 2, 0]:
         subprocess.run([sys.executable, "scripts/render_summary.py", "--seed", str(seed)], cwd=ROOT, check=True)
     m8 = pd.read_csv(RES / "test" / "metrics.csv")
@@ -64,17 +66,28 @@ def main() -> None:
          "## Calibration (claim C5; rule unchanged: 90 % coverage in [0.8, 0.95] and spread-skill in [0.7, 1.3])", "",
          "| Variant | members | seed | CRPS | MAE | 90 % cov. | 50 % cov. | spread-skill | verdict |",
          "|---|---|---|---|---|---|---|---|---|"]
-    rows = []
-    for df in (m8[m8.variant == "diff_phys+G+P"], m32):
+    rows, raw = [], []
+    m32 = m32.sort_values(["variant", "seed"], ascending=[False, True])
+    for df in (m8[m8.variant == "diff_phys+G+P"].sort_values("seed"), m32):
         for r in df.itertuples():
             v = c5(r)
             if r.variant == "diff_phys+G+P+Cal":
                 rows.append(v)
+            elif int(r.members) == 32:
+                raw.append(v)
             L.append(f"| {r.variant} | {int(r.members)} | {r.seed} | {r.crps:.4f} | {r.mae:.4f} | {r.cov90:.3f} | "
                      f"{r.cov50:.3f} | {r.spread_skill:.2f} | {v} |")
     comb = ("supported" if rows and all(v == "supported" for v in rows) else
             "not supported" if rows and all(v.startswith("not") for v in rows) else "mixed across seeds")
-    L += ["", f"**Calibrated model (diff_phys+G+P+Cal, 32 members), combined over {len(rows)} seeds: {comb}.**", "",
+    comb_raw = ("supported" if raw and all(v == "supported" for v in raw) else
+                "not supported" if raw and all(v.startswith("not") for v in raw) else "mixed across seeds")
+    L += ["", f"**Pre-registered: calibrated model (diff_phys+G+P+Cal, 32 members), combined over {len(rows)} seeds: "
+          f"{comb}.** The validation-fitted bias correction did not transfer to the test years (it raises CRPS and "
+          "MAE relative to the uncorrected 32-member ensemble).", "",
+          f"Exploratory (seeds 1-2 added after seeing seed 0): uncorrected model with 32 members, combined over "
+          f"{len(raw)} seeds: {comb_raw}. Compared with the 8-member rows, this indicates that most of the "
+          "8-member under-coverage comes from the small ensemble: the empirical 5-95 % interval of M members cannot "
+          "reach nominal coverage for small M (even [min, max] covers (M-1)/(M+1) = 78 % for M = 8).", "",
           "Replication of the other v2 claims on these locations (8 members, uncalibrated): "
           "results/v21/RESULTS_SUMMARY.md (seed-robustness table).", "",
           "Caveat: only the locations downloaded by the deadline were used; bootstrap intervals over so few location "

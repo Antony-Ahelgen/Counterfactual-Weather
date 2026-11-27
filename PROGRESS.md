@@ -58,6 +58,10 @@ Not needed: the pipeline uses Open-Meteo era5_seamless (key-free).
   unconstrained diffusion not supported; drought effects insufficient evidence; calibration not supported
   (90 % coverage 0.71). Paper/docs updated, audit OK, 33 tests pass. Downloads (25 reserved test + 80 extra) resumed.
 
+- 2026-11-27 19:25 v2.1 confirmation on 12 reserved fresh locations (results/v21/CONFIRMATION.md): physics
+  consistency and sharper-than-det supported in all seeds; pre-registered calibrated model mixed; uncorrected
+  32-member ensembles meet the calibration rule in all seeds (exploratory). Paper section added.
+
 ## Next  (RESUME HERE)
 1. Downloads for a possible v3 run in the background (resumable):
    `.venv\Scripts\python scripts\download_data.py --stage s2 --workers 5 --threads 3 >> runs\download\s2_v2test.log 2>&1`
