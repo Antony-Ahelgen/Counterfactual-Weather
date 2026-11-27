@@ -1,0 +1,12 @@
+{
+  "result_file": "metrics_ci.csv",
+  "command": "python.exe scripts/eval_all.py --preset medium_tuned --split test --tag test --n_windows 120 --members 8 --variants observed persistence climatology clim_anomaly det diff_plain diff_phys+G+P diff_phys diff_phys+G diff_phys+P diff_plain+G+P",
+  "git_commit": "a19d971e59c0bbdcf498c40955d15534fbe80937",
+  "seed": 0,
+  "config": null,
+  "timestamp": "2026-11-26T19:48:33",
+  "python": "3.14.2",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "split": "test",
+  "bootstrap": "1000 x locations"
+}

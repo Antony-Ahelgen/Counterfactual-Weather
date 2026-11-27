@@ -1,174 +1,174 @@
 part,variant,metric,value
-1a_backtest,clim_anomaly,mae_nondrought,0.1567987383025823
-1a_backtest,climatology,mae_nondrought,0.15245620128331064
-1a_backtest,det,mae_nondrought,0.10209829735331524
-1a_backtest,diff_phys_G_P,mae_nondrought,0.12381868023952634
-1a_backtest,diff_phys_G,mae_nondrought,0.1239327434853558
-1a_backtest,diff_phys_P,mae_nondrought,0.12351052943318847
-1a_backtest,diff_phys,mae_nondrought,0.12433669299093583
-1a_backtest,diff_plain_G_P,mae_nondrought,0.11598717796541139
-1a_backtest,diff_plain,mae_nondrought,0.11570393801991151
-1a_backtest,persistence,mae_nondrought,0.12775332572946907
-1b_crossyear,det [drought windows],mae_normal,0.1097105998011809
-1b_crossyear,det [drought windows],mae_persistence,0.07965352210627974
-1b_crossyear,det [drought windows],mae_climatology,0.08370245838326788
-1b_crossyear,det [drought windows],mae_factual,0.12393940728968225
-1b_crossyear,det [all windows],mae_normal,0.13204861525951003
-1b_crossyear,det [all windows],mae_persistence,0.10193379524986897
-1b_crossyear,det [all windows],mae_climatology,0.10635918087223895
-1b_crossyear,det [all windows],mae_factual,0.13417038407578127
-1b_crossyear,diff_phys [drought windows],mae_normal,0.13386187784294312
-1b_crossyear,diff_phys [drought windows],mae_persistence,0.07965352210627974
-1b_crossyear,diff_phys [drought windows],mae_climatology,0.08370245838326788
-1b_crossyear,diff_phys [drought windows],mae_factual,0.15028860360391133
-1b_crossyear,diff_phys [all windows],mae_normal,0.14601156551761063
-1b_crossyear,diff_phys [all windows],mae_persistence,0.10193379524986897
-1b_crossyear,diff_phys [all windows],mae_climatology,0.10635918087223895
-1b_crossyear,diff_phys [all windows],mae_factual,0.14855843719652004
-1b_crossyear,diff_phys_G_P [drought windows],mae_normal,0.13336847897329376
-1b_crossyear,diff_phys_G_P [drought windows],mae_persistence,0.07965352210627974
-1b_crossyear,diff_phys_G_P [drought windows],mae_climatology,0.08370245838326788
-1b_crossyear,diff_phys_G_P [drought windows],mae_factual,0.1501593452761014
-1b_crossyear,diff_phys_G_P [all windows],mae_normal,0.1460412654170891
-1b_crossyear,diff_phys_G_P [all windows],mae_persistence,0.10193379524986897
-1b_crossyear,diff_phys_G_P [all windows],mae_climatology,0.10635918087223895
-1b_crossyear,diff_phys_G_P [all windows],mae_factual,0.14856519003730279
-1b_crossyear,diff_phys_G_P_C [drought windows],mae_normal,0.13336847897329376
-1b_crossyear,diff_phys_G_P_C [drought windows],mae_persistence,0.07965352210627974
-1b_crossyear,diff_phys_G_P_C [drought windows],mae_climatology,0.08370245838326788
-1b_crossyear,diff_phys_G_P_C [drought windows],mae_factual,0.1501593452761014
-1b_crossyear,diff_phys_G_P_C [all windows],mae_normal,0.1460412654170891
-1b_crossyear,diff_phys_G_P_C [all windows],mae_persistence,0.10193379524986897
-1b_crossyear,diff_phys_G_P_C [all windows],mae_climatology,0.10635918087223895
-1b_crossyear,diff_phys_G_P_C [all windows],mae_factual,0.14856519003730279
-1b_crossyear,diff_plain [drought windows],mae_normal,0.12525297012230535
-1b_crossyear,diff_plain [drought windows],mae_persistence,0.07965352210627974
-1b_crossyear,diff_plain [drought windows],mae_climatology,0.08370245838326788
-1b_crossyear,diff_plain [drought windows],mae_factual,0.15125406974717667
-1b_crossyear,diff_plain [all windows],mae_normal,0.14045601713406525
-1b_crossyear,diff_plain [all windows],mae_persistence,0.10193379524986897
-1b_crossyear,diff_plain [all windows],mae_climatology,0.10635918087223895
-1b_crossyear,diff_plain [all windows],mae_factual,0.14591338068711832
-2_natural_experiment,det,n_matched,3.0
-2_natural_experiment,det,max_abs_smd,0.827735444225715
-2_natural_experiment,det,did_mean,-0.09210585057735443
-2_natural_experiment,det,model_mean,-0.047473435600598655
-2_natural_experiment,det,bias_model_minus_did,0.044632414976755776
-2_natural_experiment,det,corr,0.9996877282510058
+1a_backtest,clim_anomaly,mae_nondrought,0.14518024283451073
+1a_backtest,climatology,mae_nondrought,0.12327929041062731
+1a_backtest,det,mae_nondrought,0.09444603530426304
+1a_backtest,diff_phys_G_P,mae_nondrought,0.10346941014507396
+1a_backtest,diff_phys_G,mae_nondrought,0.10356539538536813
+1a_backtest,diff_phys_P,mae_nondrought,0.10346941014507396
+1a_backtest,diff_phys,mae_nondrought,0.10356539538536813
+1a_backtest,diff_plain_G_P,mae_nondrought,0.09914129209646176
+1a_backtest,diff_plain,mae_nondrought,0.0994416173230337
+1a_backtest,persistence,mae_nondrought,0.12092599307205724
+1b_crossyear,det [drought windows],mae_normal,0.11514804362256212
+1b_crossyear,det [drought windows],mae_persistence,0.07379600144485347
+1b_crossyear,det [drought windows],mae_climatology,0.08212440058099028
+1b_crossyear,det [drought windows],mae_factual,0.1280328491692274
+1b_crossyear,det [all windows],mae_normal,0.11530660971748748
+1b_crossyear,det [all windows],mae_persistence,0.08842586973500964
+1b_crossyear,det [all windows],mae_climatology,0.08600233570607795
+1b_crossyear,det [all windows],mae_factual,0.11886274143931441
+1b_crossyear,diff_phys [drought windows],mae_normal,0.11895306172740532
+1b_crossyear,diff_phys [drought windows],mae_persistence,0.07379600144485347
+1b_crossyear,diff_phys [drought windows],mae_climatology,0.08212440058099028
+1b_crossyear,diff_phys [drought windows],mae_factual,0.1287977813126985
+1b_crossyear,diff_phys [all windows],mae_normal,0.11995072104619038
+1b_crossyear,diff_phys [all windows],mae_persistence,0.08842586973500964
+1b_crossyear,diff_phys [all windows],mae_climatology,0.08600233570607795
+1b_crossyear,diff_phys [all windows],mae_factual,0.1201306984231922
+1b_crossyear,diff_phys_G_P [drought windows],mae_normal,0.11900281496426167
+1b_crossyear,diff_phys_G_P [drought windows],mae_persistence,0.07379600144485347
+1b_crossyear,diff_phys_G_P [drought windows],mae_climatology,0.08212440058099028
+1b_crossyear,diff_phys_G_P [drought windows],mae_factual,0.1288650424447266
+1b_crossyear,diff_phys_G_P [all windows],mae_normal,0.11988128816637354
+1b_crossyear,diff_phys_G_P [all windows],mae_persistence,0.08842586973500964
+1b_crossyear,diff_phys_G_P [all windows],mae_climatology,0.08600233570607795
+1b_crossyear,diff_phys_G_P [all windows],mae_factual,0.12005773694276368
+1b_crossyear,diff_phys_G_P_C [drought windows],mae_normal,0.11900281496426167
+1b_crossyear,diff_phys_G_P_C [drought windows],mae_persistence,0.07379600144485347
+1b_crossyear,diff_phys_G_P_C [drought windows],mae_climatology,0.08212440058099028
+1b_crossyear,diff_phys_G_P_C [drought windows],mae_factual,0.1288650424447266
+1b_crossyear,diff_phys_G_P_C [all windows],mae_normal,0.11988128816637354
+1b_crossyear,diff_phys_G_P_C [all windows],mae_persistence,0.08842586973500964
+1b_crossyear,diff_phys_G_P_C [all windows],mae_climatology,0.08600233570607795
+1b_crossyear,diff_phys_G_P_C [all windows],mae_factual,0.12005773694276368
+1b_crossyear,diff_plain [drought windows],mae_normal,0.11111072159303187
+1b_crossyear,diff_plain [drought windows],mae_persistence,0.07379600144485347
+1b_crossyear,diff_plain [drought windows],mae_climatology,0.08212440058099028
+1b_crossyear,diff_plain [drought windows],mae_factual,0.12750700303281595
+1b_crossyear,diff_plain [all windows],mae_normal,0.12155717417466846
+1b_crossyear,diff_plain [all windows],mae_persistence,0.08842586973500964
+1b_crossyear,diff_plain [all windows],mae_climatology,0.08600233570607795
+1b_crossyear,diff_plain [all windows],mae_factual,0.123056074145769
+2_natural_experiment,det,n_matched,10.0
+2_natural_experiment,det,max_abs_smd,0.46972331624569796
+2_natural_experiment,det,did_mean,-0.09837360506256422
+2_natural_experiment,det,model_mean,-0.040238973416853695
+2_natural_experiment,det,bias_model_minus_did,0.05813463164571051
+2_natural_experiment,det,corr,-0.15113154197411593
 2_natural_experiment,det,did_in_model_90pi,0.0
-2_natural_experiment,det,anom_n,100.0
-2_natural_experiment,det,anom_corr,0.05844652036591763
-2_natural_experiment,det,anom_corr_lo95,-0.14400074964209636
-2_natural_experiment,det,anom_corr_hi95,0.32227942982991636
-2_natural_experiment,det,anom_slope,0.19361841711603645
-2_natural_experiment,det,anom_mean_obs_drought,-0.07414386121349202
-2_natural_experiment,det,anom_mean_model_drought,-0.05017532185754842
-2_natural_experiment,diff_phys,n_matched,3.0
-2_natural_experiment,diff_phys,max_abs_smd,0.827735444225715
-2_natural_experiment,diff_phys,did_mean,-0.09210585057735443
-2_natural_experiment,diff_phys,model_mean,-0.08688344309727351
-2_natural_experiment,diff_phys,bias_model_minus_did,0.005222407480080922
-2_natural_experiment,diff_phys,corr,-0.2678085364769097
-2_natural_experiment,diff_phys,did_in_model_90pi,0.0
-2_natural_experiment,diff_phys,anom_n,100.0
-2_natural_experiment,diff_phys,anom_corr,0.10958042544752382
-2_natural_experiment,diff_phys,anom_corr_lo95,-0.08466005623233919
-2_natural_experiment,diff_phys,anom_corr_hi95,0.33173819298369095
-2_natural_experiment,diff_phys,anom_slope,0.24010365357481803
-2_natural_experiment,diff_phys,anom_mean_obs_drought,-0.07414386121349202
-2_natural_experiment,diff_phys,anom_mean_model_drought,-0.097401089552376
-2_natural_experiment,diff_phys_G_P,n_matched,3.0
-2_natural_experiment,diff_phys_G_P,max_abs_smd,0.827735444225715
-2_natural_experiment,diff_phys_G_P,did_mean,-0.09210585057735443
-2_natural_experiment,diff_phys_G_P,model_mean,-0.08678710212310155
-2_natural_experiment,diff_phys_G_P,bias_model_minus_did,0.005318748454252879
-2_natural_experiment,diff_phys_G_P,corr,-0.3245540589565433
-2_natural_experiment,diff_phys_G_P,did_in_model_90pi,0.0
-2_natural_experiment,diff_phys_G_P,anom_n,100.0
-2_natural_experiment,diff_phys_G_P,anom_corr,0.11667511416024733
-2_natural_experiment,diff_phys_G_P,anom_corr_lo95,-0.08174317331753672
-2_natural_experiment,diff_phys_G_P,anom_corr_hi95,0.341338118708094
-2_natural_experiment,diff_phys_G_P,anom_slope,0.25955895404084356
-2_natural_experiment,diff_phys_G_P,anom_mean_obs_drought,-0.07414386121349202
-2_natural_experiment,diff_phys_G_P,anom_mean_model_drought,-0.09784078639414576
-2_natural_experiment,diff_phys_G_P_C,n_matched,3.0
-2_natural_experiment,diff_phys_G_P_C,max_abs_smd,0.827735444225715
-2_natural_experiment,diff_phys_G_P_C,did_mean,-0.09210585057735443
-2_natural_experiment,diff_phys_G_P_C,model_mean,-0.08678710212310155
-2_natural_experiment,diff_phys_G_P_C,bias_model_minus_did,0.005318748454252879
-2_natural_experiment,diff_phys_G_P_C,corr,-0.3245540589565433
-2_natural_experiment,diff_phys_G_P_C,did_in_model_90pi,0.0
-2_natural_experiment,diff_phys_G_P_C,anom_n,100.0
-2_natural_experiment,diff_phys_G_P_C,anom_corr,0.11667511416024733
-2_natural_experiment,diff_phys_G_P_C,anom_corr_lo95,-0.08174317331753672
-2_natural_experiment,diff_phys_G_P_C,anom_corr_hi95,0.341338118708094
-2_natural_experiment,diff_phys_G_P_C,anom_slope,0.25955895404084356
-2_natural_experiment,diff_phys_G_P_C,anom_mean_obs_drought,-0.07414386121349202
-2_natural_experiment,diff_phys_G_P_C,anom_mean_model_drought,-0.09784078639414576
-2_natural_experiment,diff_plain,n_matched,3.0
-2_natural_experiment,diff_plain,max_abs_smd,0.827735444225715
-2_natural_experiment,diff_plain,did_mean,-0.09210585057735443
-2_natural_experiment,diff_plain,model_mean,-0.0720874195297559
-2_natural_experiment,diff_plain,bias_model_minus_did,0.020018431047598522
-2_natural_experiment,diff_plain,corr,0.7970616174795118
-2_natural_experiment,diff_plain,did_in_model_90pi,0.0
-2_natural_experiment,diff_plain,anom_n,100.0
-2_natural_experiment,diff_plain,anom_corr,0.08174112830259864
-2_natural_experiment,diff_plain,anom_corr_lo95,-0.07481487421728715
-2_natural_experiment,diff_plain,anom_corr_hi95,0.3071816053936164
-2_natural_experiment,diff_plain,anom_slope,0.1754047276400393
-2_natural_experiment,diff_plain,anom_mean_obs_drought,-0.07414386121349202
-2_natural_experiment,diff_plain,anom_mean_model_drought,-0.07663688022229406
-3_placebo,det,scenario_placebo_mean,6.0742987913946655e-05
+2_natural_experiment,det,anom_n,200.0
+2_natural_experiment,det,anom_corr,0.3350586965624791
+2_natural_experiment,det,anom_corr_lo95,0.1210172101518556
+2_natural_experiment,det,anom_corr_hi95,0.4952795092371558
+2_natural_experiment,det,anom_slope,0.7939283473688485
+2_natural_experiment,det,anom_mean_obs_drought,-0.0438675500108334
+2_natural_experiment,det,anom_mean_model_drought,-0.043343112191549786
+2_natural_experiment,diff_phys,n_matched,10.0
+2_natural_experiment,diff_phys,max_abs_smd,0.46972331624569796
+2_natural_experiment,diff_phys,did_mean,-0.09837360506256422
+2_natural_experiment,diff_phys,model_mean,-0.07546648886054755
+2_natural_experiment,diff_phys,bias_model_minus_did,0.02290711620201667
+2_natural_experiment,diff_phys,corr,-0.38552859039458637
+2_natural_experiment,diff_phys,did_in_model_90pi,0.1
+2_natural_experiment,diff_phys,anom_n,200.0
+2_natural_experiment,diff_phys,anom_corr,0.23223501701902727
+2_natural_experiment,diff_phys,anom_corr_lo95,0.0585597718877301
+2_natural_experiment,diff_phys,anom_corr_hi95,0.38445433299237064
+2_natural_experiment,diff_phys,anom_slope,0.4728612952232071
+2_natural_experiment,diff_phys,anom_mean_obs_drought,-0.0438675500108334
+2_natural_experiment,diff_phys,anom_mean_model_drought,-0.0773206444700127
+2_natural_experiment,diff_phys_G_P,n_matched,10.0
+2_natural_experiment,diff_phys_G_P,max_abs_smd,0.46972331624569796
+2_natural_experiment,diff_phys_G_P,did_mean,-0.09837360506256422
+2_natural_experiment,diff_phys_G_P,model_mean,-0.07541442951187491
+2_natural_experiment,diff_phys_G_P,bias_model_minus_did,0.022959175550689298
+2_natural_experiment,diff_phys_G_P,corr,-0.38552334373784075
+2_natural_experiment,diff_phys_G_P,did_in_model_90pi,0.1
+2_natural_experiment,diff_phys_G_P,anom_n,200.0
+2_natural_experiment,diff_phys_G_P,anom_corr,0.23247668605082106
+2_natural_experiment,diff_phys_G_P,anom_corr_lo95,0.058763525593379703
+2_natural_experiment,diff_phys_G_P,anom_corr_hi95,0.3844866105401304
+2_natural_experiment,diff_phys_G_P,anom_slope,0.4742671072261822
+2_natural_experiment,diff_phys_G_P,anom_mean_obs_drought,-0.0438675500108334
+2_natural_experiment,diff_phys_G_P,anom_mean_model_drought,-0.07720625530118527
+2_natural_experiment,diff_phys_G_P_C,n_matched,10.0
+2_natural_experiment,diff_phys_G_P_C,max_abs_smd,0.46972331624569796
+2_natural_experiment,diff_phys_G_P_C,did_mean,-0.09837360506256422
+2_natural_experiment,diff_phys_G_P_C,model_mean,-0.07541442951187491
+2_natural_experiment,diff_phys_G_P_C,bias_model_minus_did,0.022959175550689298
+2_natural_experiment,diff_phys_G_P_C,corr,-0.38552334373784075
+2_natural_experiment,diff_phys_G_P_C,did_in_model_90pi,0.1
+2_natural_experiment,diff_phys_G_P_C,anom_n,200.0
+2_natural_experiment,diff_phys_G_P_C,anom_corr,0.23247668605082106
+2_natural_experiment,diff_phys_G_P_C,anom_corr_lo95,0.058763525593379703
+2_natural_experiment,diff_phys_G_P_C,anom_corr_hi95,0.3844866105401304
+2_natural_experiment,diff_phys_G_P_C,anom_slope,0.4742671072261822
+2_natural_experiment,diff_phys_G_P_C,anom_mean_obs_drought,-0.0438675500108334
+2_natural_experiment,diff_phys_G_P_C,anom_mean_model_drought,-0.07720625530118527
+2_natural_experiment,diff_plain,n_matched,10.0
+2_natural_experiment,diff_plain,max_abs_smd,0.46972331624569796
+2_natural_experiment,diff_plain,did_mean,-0.09837360506256422
+2_natural_experiment,diff_plain,model_mean,-0.06535228658467532
+2_natural_experiment,diff_plain,bias_model_minus_did,0.0330213184778889
+2_natural_experiment,diff_plain,corr,-0.33226502442789624
+2_natural_experiment,diff_plain,did_in_model_90pi,0.1
+2_natural_experiment,diff_plain,anom_n,200.0
+2_natural_experiment,diff_plain,anom_corr,0.2532166488609183
+2_natural_experiment,diff_plain,anom_corr_lo95,0.054589851109887635
+2_natural_experiment,diff_plain,anom_corr_hi95,0.4336362428729664
+2_natural_experiment,diff_plain,anom_slope,0.4817105570737464
+2_natural_experiment,diff_plain,anom_mean_obs_drought,-0.0438675500108334
+2_natural_experiment,diff_plain,anom_mean_model_drought,-0.06261560466626416
+3_placebo,det,scenario_placebo_mean,-0.0002517446445830202
 3_placebo,det,noise_placebo_mean,0.0
 3_placebo,det,scenario_placebo_frac_below_tol,1.0
-3_placebo,det,temporal_auc,0.9255189255189256
-3_placebo,det,perm_real_contrast,-0.05127787932211855
-3_placebo,det,perm_null_mean,-0.009963295908947484
-3_placebo,det,perm_p_one_sided,0.001999000499750125
-3_placebo,det,crn_var_ratio,0.9737423679232946
-3_placebo,det,frac_drought_above_normal,0.1771435546875
-3_placebo,det,mean_dDN_drought_windows,-0.0524428788986471
-3_placebo,diff_phys,scenario_placebo_mean,0.00025717754221565473
-3_placebo,diff_phys,noise_placebo_mean,-0.0022063107712892815
-3_placebo,diff_phys,scenario_placebo_frac_below_tol,0.9827586206896551
-3_placebo,diff_phys,temporal_auc,0.9621489621489622
-3_placebo,diff_phys,perm_real_contrast,-0.09370144925768782
-3_placebo,diff_phys,perm_null_mean,-0.02076848134094484
+3_placebo,det,temporal_auc,0.7830999754360108
+3_placebo,det,perm_real_contrast,-0.0393771741070433
+3_placebo,det,perm_null_mean,-0.002401249805101772
+3_placebo,det,perm_p_one_sided,0.0004997501249375312
+3_placebo,det,crn_var_ratio,1.0215153148155809
+3_placebo,det,frac_drought_above_normal,0.20398765563964844
+3_placebo,det,mean_dDN_drought_windows,-0.0420739956645538
+3_placebo,diff_phys,scenario_placebo_mean,-4.4115295029861287e-05
+3_placebo,diff_phys,noise_placebo_mean,-0.0010865826939698308
+3_placebo,diff_phys,scenario_placebo_frac_below_tol,0.9873417721518988
+3_placebo,diff_phys,temporal_auc,0.9584868582657824
+3_placebo,diff_phys,perm_real_contrast,-0.07383913038149159
+3_placebo,diff_phys,perm_null_mean,-0.004058971097076393
 3_placebo,diff_phys,perm_p_one_sided,0.0004997501249375312
-3_placebo,diff_phys,crn_var_ratio,0.03261802238711016
-3_placebo,diff_phys,frac_drought_above_normal,0.03321746826171875
-3_placebo,diff_phys,mean_dDN_drought_windows,-0.09840862991081344
-3_placebo,diff_phys_G_P,scenario_placebo_mean,0.0002773335045589945
-3_placebo,diff_phys_G_P,noise_placebo_mean,-0.0022055692138383165
-3_placebo,diff_phys_G_P,scenario_placebo_frac_below_tol,0.9827586206896551
-3_placebo,diff_phys_G_P,temporal_auc,0.9658119658119658
-3_placebo,diff_phys_G_P,perm_real_contrast,-0.0945588015928189
-3_placebo,diff_phys_G_P,perm_null_mean,-0.020793721680384365
+3_placebo,diff_phys,crn_var_ratio,0.038282881231377824
+3_placebo,diff_phys,frac_drought_above_normal,0.056215972900390626
+3_placebo,diff_phys,mean_dDN_drought_windows,-0.07720565974064496
+3_placebo,diff_phys_G_P,scenario_placebo_mean,-4.322151796224739e-05
+3_placebo,diff_phys_G_P,noise_placebo_mean,-0.001097410034853965
+3_placebo,diff_phys_G_P,scenario_placebo_frac_below_tol,0.9873417721518988
+3_placebo,diff_phys_G_P,temporal_auc,0.9584868582657824
+3_placebo,diff_phys_G_P,perm_real_contrast,-0.07371636458871728
+3_placebo,diff_phys_G_P,perm_null_mean,-0.004053160377715603
 3_placebo,diff_phys_G_P,perm_p_one_sided,0.0004997501249375312
-3_placebo,diff_phys_G_P,crn_var_ratio,0.039985091480369786
-3_placebo,diff_phys_G_P,frac_drought_above_normal,0.03014434814453125
-3_placebo,diff_phys_G_P,mean_dDN_drought_windows,-0.09898156672716141
-3_placebo,diff_phys_G_P_C,scenario_placebo_mean,0.0002773335045589945
-3_placebo,diff_phys_G_P_C,noise_placebo_mean,-0.0022055692138383165
-3_placebo,diff_phys_G_P_C,scenario_placebo_frac_below_tol,0.9827586206896551
-3_placebo,diff_phys_G_P_C,temporal_auc,0.9658119658119658
-3_placebo,diff_phys_G_P_C,perm_real_contrast,-0.0945588015928189
-3_placebo,diff_phys_G_P_C,perm_null_mean,-0.020793721680384365
+3_placebo,diff_phys_G_P,crn_var_ratio,0.038874673808468
+3_placebo,diff_phys_G_P,frac_drought_above_normal,0.05563995361328125
+3_placebo,diff_phys_G_P,mean_dDN_drought_windows,-0.07708710670957099
+3_placebo,diff_phys_G_P_C,scenario_placebo_mean,-4.322151796224739e-05
+3_placebo,diff_phys_G_P_C,noise_placebo_mean,-0.001097410034853965
+3_placebo,diff_phys_G_P_C,scenario_placebo_frac_below_tol,0.9873417721518988
+3_placebo,diff_phys_G_P_C,temporal_auc,0.9584868582657824
+3_placebo,diff_phys_G_P_C,perm_real_contrast,-0.07371636458871728
+3_placebo,diff_phys_G_P_C,perm_null_mean,-0.004053160377715603
 3_placebo,diff_phys_G_P_C,perm_p_one_sided,0.0004997501249375312
-3_placebo,diff_phys_G_P_C,crn_var_ratio,0.038836886841844255
-3_placebo,diff_phys_G_P_C,frac_drought_above_normal,0.000104827880859375
-3_placebo,diff_phys_G_P_C,mean_dDN_drought_windows,-0.0991685117284457
-3_placebo,diff_plain,scenario_placebo_mean,-9.46702047227079e-05
-3_placebo,diff_plain,noise_placebo_mean,-0.0025128722691442817
-3_placebo,diff_plain,scenario_placebo_frac_below_tol,0.9827586206896551
-3_placebo,diff_plain,temporal_auc,0.9304029304029304
-3_placebo,diff_plain,perm_real_contrast,-0.0734024679204972
-3_placebo,diff_plain,perm_null_mean,-0.019854975387582102
-3_placebo,diff_plain,perm_p_one_sided,0.0034982508745627187
-3_placebo,diff_plain,crn_var_ratio,0.0386200383010788
-3_placebo,diff_plain,frac_drought_above_normal,0.12507049560546876
-3_placebo,diff_plain,mean_dDN_drought_windows,-0.0775442040628857
+3_placebo,diff_phys_G_P_C,crn_var_ratio,0.036696554811145574
+3_placebo,diff_phys_G_P_C,frac_drought_above_normal,0.037655792236328124
+3_placebo,diff_phys_G_P_C,mean_dDN_drought_windows,-0.07745952138920194
+3_placebo,diff_plain,scenario_placebo_mean,0.00016762273961934556
+3_placebo,diff_plain,noise_placebo_mean,-0.001237257813627366
+3_placebo,diff_plain,scenario_placebo_frac_below_tol,0.9810126582278481
+3_placebo,diff_plain,temporal_auc,0.8968312453942521
+3_placebo,diff_plain,perm_real_contrast,-0.05923883547133
+3_placebo,diff_plain,perm_null_mean,-0.00287272886698064
+3_placebo,diff_plain,perm_p_one_sided,0.0004997501249375312
+3_placebo,diff_plain,crn_var_ratio,0.043769865760009116
+3_placebo,diff_plain,frac_drought_above_normal,0.09214111328125
+3_placebo,diff_plain,mean_dDN_drought_windows,-0.06302267879895541
 4_calibration,observed,crps,
 4_calibration,observed,cov50,
 4_calibration,observed,cov80,
@@ -176,150 +176,150 @@ part,variant,metric,value
 4_calibration,observed,spread_skill,
 4_calibration,observed,rank_hist_chi2_flatness,
 4_calibration,observed,did_in_effect_90pi,
-4_calibration,persistence,crps,0.12744706977426556
+4_calibration,persistence,crps,0.11573432677414326
 4_calibration,persistence,cov50,
 4_calibration,persistence,cov80,
 4_calibration,persistence,cov90,
 4_calibration,persistence,spread_skill,
 4_calibration,persistence,rank_hist_chi2_flatness,
 4_calibration,persistence,did_in_effect_90pi,
-4_calibration,climatology,crps,0.15955841986357985
+4_calibration,climatology,crps,0.12230763787792218
 4_calibration,climatology,cov50,
 4_calibration,climatology,cov80,
 4_calibration,climatology,cov90,
 4_calibration,climatology,spread_skill,
 4_calibration,climatology,rank_hist_chi2_flatness,
 4_calibration,climatology,did_in_effect_90pi,
-4_calibration,clim_anomaly,crps,0.16339940214251011
+4_calibration,clim_anomaly,crps,0.13884953657005986
 4_calibration,clim_anomaly,cov50,
 4_calibration,clim_anomaly,cov80,
 4_calibration,clim_anomaly,cov90,
 4_calibration,clim_anomaly,spread_skill,
 4_calibration,clim_anomaly,rank_hist_chi2_flatness,
 4_calibration,clim_anomaly,did_in_effect_90pi,
-4_calibration,det,crps,0.10186136197532472
+4_calibration,det,crps,0.09094201074612056
 4_calibration,det,cov50,
 4_calibration,det,cov80,
 4_calibration,det,cov90,
 4_calibration,det,spread_skill,
 4_calibration,det,rank_hist_chi2_flatness,
 4_calibration,det,did_in_effect_90pi,0.0
-4_calibration,diff_plain,crps,0.07906808382547352
-4_calibration,diff_plain,cov50,0.4094965866150774
-4_calibration,diff_plain,cov80,0.6527011322277817
-4_calibration,diff_plain,cov90,0.725293843380956
-4_calibration,diff_plain,spread_skill,0.9119425201663828
-4_calibration,diff_plain,rank_hist_chi2_flatness,0.033710595244595076
-4_calibration,diff_plain,did_in_effect_90pi,0.0
-4_calibration,diff_phys+G+P,crps,0.08471319845160283
-4_calibration,diff_phys+G+P,cov50,0.3479721501193467
-4_calibration,diff_phys+G+P,cov80,0.5713905455152785
-4_calibration,diff_phys+G+P,cov90,0.6468294838516622
-4_calibration,diff_phys+G+P,spread_skill,0.806040330067916
-4_calibration,diff_phys+G+P,rank_hist_chi2_flatness,0.12436657660259058
-4_calibration,diff_phys+G+P,did_in_effect_90pi,0.0
-4_calibration,diff_phys,crps,0.08431474016977328
-4_calibration,diff_phys,cov50,0.3600494784236494
-4_calibration,diff_phys,cov80,0.5909696657596782
-4_calibration,diff_phys,cov90,0.6679830757346954
-4_calibration,diff_phys,spread_skill,0.8471528216071565
-4_calibration,diff_phys,rank_hist_chi2_flatness,0.10027713530679687
-4_calibration,diff_phys,did_in_effect_90pi,0.0
-4_calibration,diff_phys+G,crps,0.08477700930389868
-4_calibration,diff_phys+G,cov50,0.3477755586329759
-4_calibration,diff_phys+G,cov80,0.5712879004029255
-4_calibration,diff_phys+G,cov90,0.6466172346362884
-4_calibration,diff_phys+G,spread_skill,0.8058783179891117
-4_calibration,diff_phys+G,rank_hist_chi2_flatness,0.12569344282140665
+4_calibration,diff_plain,crps,0.0657825161557629
+4_calibration,diff_plain,cov50,0.44571207759816006
+4_calibration,diff_plain,cov80,0.6936813044888817
+4_calibration,diff_plain,cov90,0.7623670001177859
+4_calibration,diff_plain,spread_skill,0.942998019237727
+4_calibration,diff_plain,rank_hist_chi2_flatness,0.030754856139085
+4_calibration,diff_plain,did_in_effect_90pi,0.1
+4_calibration,diff_phys+G+P,crps,0.06878087828071434
+4_calibration,diff_phys+G+P,cov50,0.3932477698174732
+4_calibration,diff_phys+G+P,cov80,0.6379448224842901
+4_calibration,diff_phys+G+P,cov90,0.7136150137726816
+4_calibration,diff_phys+G+P,spread_skill,0.8944545502114553
+4_calibration,diff_phys+G+P,rank_hist_chi2_flatness,0.016634333763648448
+4_calibration,diff_phys+G+P,did_in_effect_90pi,0.1
+4_calibration,diff_phys,crps,0.06881564845143218
+4_calibration,diff_phys,cov50,0.39313101715334275
+4_calibration,diff_phys,cov80,0.6377433466479587
+4_calibration,diff_phys,cov90,0.7132027632152651
+4_calibration,diff_phys,spread_skill,0.8964249145073001
+4_calibration,diff_phys,rank_hist_chi2_flatness,0.01668824938263312
+4_calibration,diff_phys,did_in_effect_90pi,0.1
+4_calibration,diff_phys+G,crps,0.06881564845143218
+4_calibration,diff_phys+G,cov50,0.39313101715334275
+4_calibration,diff_phys+G,cov80,0.6377433466479587
+4_calibration,diff_phys+G,cov90,0.7132027632152651
+4_calibration,diff_phys+G,spread_skill,0.8964249145073001
+4_calibration,diff_phys+G,rank_hist_chi2_flatness,0.01668824938263312
 4_calibration,diff_phys+G,did_in_effect_90pi,
-4_calibration,diff_phys+P,crps,0.0840601950382179
-4_calibration,diff_phys+P,cov50,0.35755989951217476
-4_calibration,diff_phys+P,cov80,0.5874223202666685
-4_calibration,diff_phys+P,cov90,0.6650185457101302
-4_calibration,diff_phys+P,spread_skill,0.8330450298583134
-4_calibration,diff_phys+P,rank_hist_chi2_flatness,0.09884476527912504
+4_calibration,diff_phys+P,crps,0.06878087828071434
+4_calibration,diff_phys+P,cov50,0.3932477698174732
+4_calibration,diff_phys+P,cov80,0.6379448224842901
+4_calibration,diff_phys+P,cov90,0.7136150137726816
+4_calibration,diff_phys+P,spread_skill,0.8944545502114553
+4_calibration,diff_phys+P,rank_hist_chi2_flatness,0.016634333763648448
 4_calibration,diff_phys+P,did_in_effect_90pi,
-4_calibration,diff_plain+G+P,crps,0.0802732409289013
-4_calibration,diff_plain+G+P,cov50,0.37729733679427135
-4_calibration,diff_plain+G+P,cov80,0.6063264184162729
-4_calibration,diff_plain+G+P,cov90,0.6783919860263468
-4_calibration,diff_plain+G+P,spread_skill,0.831662309680814
-4_calibration,diff_plain+G+P,rank_hist_chi2_flatness,0.07525842731521645
+4_calibration,diff_plain+G+P,crps,0.06570975838607652
+4_calibration,diff_plain+G+P,cov50,0.4458846235708131
+4_calibration,diff_plain+G+P,cov80,0.6938125220848513
+4_calibration,diff_plain+G+P,cov90,0.7627389555079361
+4_calibration,diff_plain+G+P,spread_skill,0.9391246129109414
+4_calibration,diff_plain+G+P,rank_hist_chi2_flatness,0.030806075588969556
 4_calibration,diff_plain+G+P,did_in_effect_90pi,
-5_violations,observed,rate_frac,0.013486804144368173
-5_violations,observed,rate_mag,0.01805040752165381
-5_violations,observed,phen_frac,0.04200620741967585
-5_violations,observed,phen_mag,0.10240579608050283
+5_violations,observed,rate_frac,0.01598378925962416
+5_violations,observed,rate_mag,0.02194342179958678
+5_violations,observed,phen_frac,0.03439864112297465
+5_violations,observed,phen_mag,0.1085081231834142
 5_violations,observed,range_frac,0.0
 5_violations,observed,mono_frac,
 5_violations,observed,mono_mag,
 5_violations,persistence,rate_frac,0.0
 5_violations,persistence,rate_mag,0.0
-5_violations,persistence,phen_frac,0.08289527893066406
-5_violations,persistence,phen_mag,0.10077347327023745
+5_violations,persistence,phen_frac,0.052858205942007214
+5_violations,persistence,phen_mag,0.09803762229589316
 5_violations,persistence,range_frac,0.0
 5_violations,persistence,mono_frac,
 5_violations,persistence,mono_mag,
-5_violations,climatology,rate_frac,0.038455449232975544
-5_violations,climatology,rate_mag,0.0203639711253345
-5_violations,climatology,phen_frac,0.03900623321533203
-5_violations,climatology,phen_mag,0.08874611463397741
+5_violations,climatology,rate_frac,0.023265420334337737
+5_violations,climatology,rate_mag,0.022125102364673063
+5_violations,climatology,phen_frac,0.022683363694411058
+5_violations,climatology,phen_mag,0.09482706510103665
 5_violations,climatology,range_frac,0.0
 5_violations,climatology,mono_frac,
 5_violations,climatology,mono_mag,
-5_violations,clim_anomaly,rate_frac,0.03195590720226106
-5_violations,clim_anomaly,rate_mag,0.016792252426967025
-5_violations,clim_anomaly,phen_frac,0.10939598083496094
-5_violations,clim_anomaly,phen_mag,0.12296830862760544
-5_violations,clim_anomaly,range_frac,0.03506755828857422
+5_violations,clim_anomaly,rate_frac,0.019224266958308176
+5_violations,clim_anomaly,rate_mag,0.021549765665370684
+5_violations,clim_anomaly,phen_frac,0.09534102219801682
+5_violations,clim_anomaly,phen_mag,0.11472615370383629
+5_violations,clim_anomaly,range_frac,0.029894902155949518
 5_violations,clim_anomaly,mono_frac,
 5_violations,clim_anomaly,mono_mag,
-5_violations,det,rate_frac,0.0001001458393471581
-5_violations,det,rate_mag,0.005614584661088884
-5_violations,det,phen_frac,0.02710247039794922
-5_violations,det,phen_mag,0.07068230025470257
-5_violations,det,range_frac,1.9073486328125e-05
-5_violations,det,mono_frac,0.12383174896240234
-5_violations,det,mono_mag,0.029949857387691736
-5_violations,diff_plain,rate_frac,0.02063204382602088
-5_violations,diff_plain,rate_mag,0.015479927533306181
-5_violations,diff_plain,phen_frac,0.05608034133911133
-5_violations,diff_plain,phen_mag,0.07855740946251899
-5_violations,diff_plain,range_frac,0.016422748565673828
-5_violations,diff_plain,mono_frac,0.08393287658691406
-5_violations,diff_plain,mono_mag,0.039566754130646586
-5_violations,diff_phys+G+P,rate_frac,0.0
-5_violations,diff_phys+G+P,rate_mag,0.0
-5_violations,diff_phys+G+P,phen_frac,2.956390380859375e-05
-5_violations,diff_phys+G+P,phen_mag,0.03374680504202843
-5_violations,diff_phys+G+P,range_frac,0.0
-5_violations,diff_phys+G+P,mono_frac,0.02097034454345703
-5_violations,diff_phys+G+P,mono_mag,0.01724820234812796
-5_violations,diff_phys,rate_frac,0.01444968531674709
-5_violations,diff_phys,rate_mag,0.014518969604978338
-5_violations,diff_phys,phen_frac,0.025597095489501953
-5_violations,diff_phys,phen_mag,0.058572917827405035
-5_violations,diff_phys,range_frac,0.012932538986206055
-5_violations,diff_phys,mono_frac,0.02141714096069336
-5_violations,diff_phys,mono_mag,0.017991278087720275
-5_violations,diff_phys+G,rate_frac,0.0030394877596566774
-5_violations,diff_phys+G,rate_mag,0.002525629906813265
-5_violations,diff_phys+G,phen_frac,1.7642974853515625e-05
-5_violations,diff_phys+G,phen_mag,0.009933651890605688
-5_violations,diff_phys+G,range_frac,0.0
-5_violations,diff_phys+G,mono_frac,0.020925521850585938
-5_violations,diff_phys+G,mono_mag,0.01724377810023725
-5_violations,diff_phys+P,rate_frac,0.0
-5_violations,diff_phys+P,rate_mag,0.0
-5_violations,diff_phys+P,phen_frac,0.019870758056640625
-5_violations,diff_phys+P,phen_mag,0.052242971141822636
-5_violations,diff_phys+P,range_frac,0.0
-5_violations,diff_phys+P,mono_frac,0.021177291870117188
-5_violations,diff_phys+P,mono_mag,0.017879842082038522
-5_violations,diff_plain+G+P,rate_frac,0.0
-5_violations,diff_plain+G+P,rate_mag,0.0
-5_violations,diff_plain+G+P,phen_frac,2.956390380859375e-05
-5_violations,diff_plain+G+P,phen_mag,0.03374680504202843
-5_violations,diff_plain+G+P,range_frac,0.0
-5_violations,diff_plain+G+P,mono_frac,0.07495903968811035
-5_violations,diff_plain+G+P,mono_mag,0.03771877917461097
+5_violations,det,rate_frac,0.0005543640586393921
+5_violations,det,rate_mag,0.014336045043399701
+5_violations,det,phen_frac,0.015694838303786058
+5_violations,det,phen_mag,0.0833509168945826
+5_violations,det,range_frac,0.00014437161959134616
+5_violations,det,mono_frac,0.21975121131310096
+5_violations,det,mono_mag,0.02717540255532815
+5_violations,diff_plain,rate_frac,0.01390581629558956
+5_violations,diff_plain,rate_mag,0.013934358936519576
+5_violations,diff_plain,phen_frac,0.04794854384202223
+5_violations,diff_plain,phen_mag,0.08159822411835194
+5_violations,diff_plain,range_frac,0.01980898930476262
+5_violations,diff_plain,mono_frac,0.08113039456881009
+5_violations,diff_plain,mono_mag,0.027408968084133588
+5_violations,diff_phys+G+P,rate_frac,0.008173653644974474
+5_violations,diff_phys+G+P,rate_mag,0.012830802311117832
+5_violations,diff_phys+G+P,phen_frac,0.024077635544996995
+5_violations,diff_phys+G+P,phen_mag,0.050069625346133344
+5_violations,diff_phys+G+P,range_frac,0.011400809654822716
+5_violations,diff_phys+G+P,mono_frac,0.02206244835486779
+5_violations,diff_phys+G+P,mono_mag,0.016346748775014512
+5_violations,diff_phys,rate_frac,0.008699658272206624
+5_violations,diff_phys,rate_mag,0.01343862757158394
+5_violations,diff_phys,phen_frac,0.02585909916804387
+5_violations,diff_phys,phen_mag,0.056350293211065806
+5_violations,diff_phys,range_frac,0.011962157029371995
+5_violations,diff_phys,mono_frac,0.021740106435922477
+5_violations,diff_phys,mono_mag,0.01632909240344396
+5_violations,diff_phys+G,rate_frac,0.008699658272206624
+5_violations,diff_phys+G,rate_mag,0.01343862757158394
+5_violations,diff_phys+G,phen_frac,0.02585909916804387
+5_violations,diff_phys+G,phen_mag,0.056350293211065806
+5_violations,diff_phys+G,range_frac,0.011962157029371995
+5_violations,diff_phys+G,mono_frac,0.021740106435922477
+5_violations,diff_phys+G,mono_mag,0.01632909240344396
+5_violations,diff_phys+P,rate_frac,0.008173653644974474
+5_violations,diff_phys+P,rate_mag,0.012830802311117832
+5_violations,diff_phys+P,phen_frac,0.024077635544996995
+5_violations,diff_phys+P,phen_mag,0.050069625346133344
+5_violations,diff_phys+P,range_frac,0.011400809654822716
+5_violations,diff_phys+P,mono_frac,0.02206244835486779
+5_violations,diff_phys+P,mono_mag,0.016346748775014512
+5_violations,diff_plain+G+P,rate_frac,0.012637950443650901
+5_violations,diff_plain+G+P,rate_mag,0.013267856718112644
+5_violations,diff_plain+G+P,phen_frac,0.04406664921687199
+5_violations,diff_plain+G+P,phen_mag,0.07781250395167333
+5_violations,diff_plain+G+P,range_frac,0.018238067626953125
+5_violations,diff_plain+G+P,mono_frac,0.08107346754807693
+5_violations,diff_plain+G+P,mono_mag,0.027454967610538006

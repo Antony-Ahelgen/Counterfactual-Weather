@@ -1,10 +1,10 @@
 {
   "result_file": "paired_tests.csv",
-  "command": "python.exe scripts/eval_all.py --preset medium_tuned --split val --tag val_guidance --members 8 --n_windows 40 --reference diff_phys+P --variants diff_phys+P diff_phys+Gx0.01+P diff_phys+Gx0.1+P",
-  "git_commit": "c9253677ec625d618123091566bbb42ee9f46c11",
+  "command": "python.exe scripts/eval_all.py --preset v2 --split val --tag val_guidance --members 8 --n_windows 60 --no_spread --reference diff_phys+P --variants observed diff_phys+P diff_phys+Gx0.003+P diff_phys+Gx0.01+P diff_phys+Gx0.03+P diff_phys+Gx0.1+P diff_phys+Gx0.3+P",
+  "git_commit": "1a2f4ef434b40e15917271a24111ae15976dc3b8",
   "seed": 0,
   "config": null,
-  "timestamp": "2026-11-26T19:36:44",
+  "timestamp": "2026-11-27T14:46:17",
   "python": "3.14.2",
   "platform": "Windows-11-10.0.26200-SP0",
   "split": "val",

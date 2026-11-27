@@ -53,18 +53,15 @@ Not needed: the pipeline uses Open-Meteo era5_seamless (key-free).
   (decided before any v2 test result). Download stopped; the 26 remaining test locations are left out of v2 (logged as
   "missing s2" in the cube meta). Finishing with `scripts/finish_v2.py` (log runs/finish_v2_stdout.log, runs/pipeline.log).
 
+- 2026-11-27 17:33 V2 DONE and promoted to results/ (medium_tuned archived). Verdicts (combined over 3 seeds):
+  physics consistency SUPPORTED; CRPS accuracy partly supported; sharper than det mixed (2 of 3 seeds); sharper than
+  unconstrained diffusion not supported; drought effects insufficient evidence; calibration not supported
+  (90 % coverage 0.71). Paper/docs updated, audit OK, 33 tests pass. Downloads (25 reserved test + 80 extra) resumed.
+
 ## Next  (RESUME HERE)
-1. Resume the v2 round (everything resumable: finished stages skipped, training resumes from checkpoints,
-   downloads skip finished locations). In PowerShell:
-   ```
-   cd C:\Users\senth\cfveg-project\counterfactual-vegetation-diffusion
-   .venv\Scripts\python scripts\finish_v2.py > runs\finish_v2_stdout.log 2>&1   (NOT run_v2.py: it would restart the download)
-   ```
-   Progress: runs/pipeline.log ("v2:" lines), runs/download/s2_v2test.log, runs/v2/<model>_s<seed>/train.log.
-2. When "V2 PIPELINE DONE": review results/v2/RESULTS_SUMMARY.md (seed-robustness table), independent review,
-   then promote: `python scripts/promote_results.py --src results/v2 --archive-name medium_tuned`, update paper/docs
-   wording against the new numbers, audit, push.
+1. Downloads for a possible v3 run in the background (resumable):
+   `.venv\Scripts\python scripts\download_data.py --stage s2 --workers 5 --threads 3 >> runs\download\s2_v2test.log 2>&1`
+   then `.venv\Scripts\python scriptsetch_extra.py >> runs\download\extra.log 2>&1`.
+2. v3 (if wanted): train on the 135 v2 locations; FRESH test = the 25 reserved v2 test locations + the X... extra
+   locations; design fixed before any v3 result. A GPU would help the sharpness claim most.
 3. Authors: verify refs.bib, port paper to the Springer LNEE template, add related work on causal attribution.
-4. Reserved extra data (owner request): `scripts/fetch_extra.py` downloads up to 80 NEW locations (IDs X...,
-   manifests/locations_extra.csv) after the v2 test-set download. Not used by v2 (no leakage into its split).
-   Resume with `.venv\Scripts\python scripts\fetch_extra.py > runs\download\extra.log 2>&1` (log: runs/download/extra.log).

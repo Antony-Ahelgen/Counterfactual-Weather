@@ -57,6 +57,22 @@ Verdict-rule changes after this review only make verdicts stricter.
 - The summary's interpretive sentence about the drought-effect bias was fixed text written from the fast run and
   became wrong for the medium run; it is now generated from the per-model ratios.
 
+## v2 round — 2026-11-26/27 (owner request: overnight improvement plan)
+- Design fixed before any v2 result (configs/presets/v2.yaml, scripts/run_v2.py docstring): fresh test locations,
+  3 seeds, 5000 steps, no rate projection, γ by a pre-registered validation rule, spread factors fitted on validation.
+- Owner deadline (2026-11-27 19:00 IST): test set reduced to the 55 fresh locations downloaded by 15:45, decided
+  before any v2 test result; finished with scripts/finish_v2.py (seeds evaluated in parallel into separate folders and
+  merged; effects split across two processes with identical seeds — per-variant outputs are independent).
+- Bugs found and fixed while finishing (presentation only, no verdict rule changed): paper_assets and make_numbers did
+  not filter multi-seed CI/paired/metrics rows (paper macros would have shown seed 2 under seed-0 tables);
+  render_summary said "1 seed", "weights not tuned", called γ = 0 "the largest candidate", mixed seeds in the MAE
+  evidence, and showed "mixed across seeds" when all seeds agreed.
+- Outcome vs medium_tuned: physics consistency partly → supported (all seeds); sharper than det not supported → mixed
+  (2 of 3 seeds); drought effects not supported → insufficient evidence (anomaly correlation CI now > 0, natural
+  experiment 10 pairs but unbalanced, SMD 0.47); calibration still not supported (90 % coverage 0.65 → 0.71);
+  drought-effect bias of physics models 1.3× → 1.8×. Promoted to results/ (previous main run in
+  results/archive_medium_tuned/).
+
 ## Pending (final audit, Section 11 of the brief)
 - [x] Clean-checkout test (2026-11-26): fresh `git clone` + fresh venv (torch CPU + requirements.lock) -> `tasks.py test` 32 passed, `tasks.py smoke` OK. It caught a critical packaging bug: `.gitignore` rule `data/` also ignored `src/cfveg/data/`, so the data package had never been committed; fixed by anchoring to `/data/`.
 - [x] Number audit (`scripts/audit_numbers.py`): OK on 2026-11-26 over docs/*.md and paper/*.tex; re-run automatically by `scripts/promote_results.py` and `tasks.py paper-assets` after every results change

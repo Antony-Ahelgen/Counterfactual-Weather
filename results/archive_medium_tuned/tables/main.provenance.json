@@ -1,0 +1,11 @@
+{
+  "result_file": "main.tex",
+  "command": "python.exe scripts/paper_assets.py",
+  "git_commit": "a19d971e59c0bbdcf498c40955d15534fbe80937",
+  "seed": null,
+  "config": null,
+  "timestamp": "2026-11-26T20:06:10",
+  "python": "3.14.2",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "inputs": "results/test, results/validation, results/val_guidance"
+}

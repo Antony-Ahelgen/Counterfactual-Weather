@@ -1,23 +1,23 @@
 {
  "variant": "diff_phys+G+P",
  "members": 8,
- "loc_id": "L0018",
+ "loc_id": "L0113",
  "year": 2022,
- "t0_bin": 20,
+ "t0_bin": 22,
  "quadrant": [
   0,
-  0
+  32
  ],
  "normal_method": "analog",
- "n_normal_analogs": 3,
+ "n_normal_analogs": 2,
  "drought_method": "observed",
- "horizon_stress_drought": 4.247283458709717,
- "horizon_stress_normal_mean": -0.39169134696324664,
- "area_mean_delta_crn": -0.2722705006599426,
- "frac_sig_loss_crn": 0.9996337890625,
- "member_area_delta_sd_crn": 0.016577651724219322,
- "member_area_delta_sd_independent": 0.03542282432317734,
- "pixel_delta_var_crn": 0.004000892862677574,
- "pixel_delta_var_independent": 0.029755378141999245,
- "crn_variance_ratio_pixel": 0.13445948640223723
+ "horizon_stress_drought": 3.455822706222534,
+ "horizon_stress_normal_mean": -0.13784727454185486,
+ "area_mean_delta_crn": -0.25415438413619995,
+ "frac_sig_loss_crn": 1.0,
+ "member_area_delta_sd_crn": 0.050365157425403595,
+ "member_area_delta_sd_independent": 0.07135108858346939,
+ "pixel_delta_var_crn": 0.008393415249884129,
+ "pixel_delta_var_independent": 0.03294453024864197,
+ "crn_variance_ratio_pixel": 0.2547741669568993
 }

@@ -1,11 +1,13 @@
 # Methods notes (adaptable into the paper)
 
 All numbers here are configuration values. They describe the **planned design** (configs/base.yaml,
-configs/presets/cpu.yaml). The **main reported run** used preset `medium_tuned` (configs/presets/medium_tuned.yaml):
-80 of the 160 locations (downloaded by a fixed cut-off), re-split 56/12/12 before training, 3000 training steps,
-8 ensemble members; λ scale selected on validation from {0.3, 1, 3}, guidance scale from {0, 0.01, 0.1}, DDIM η
-from {0, 0.5, 1} (stochastic DDIM: σ_t = η·sqrt((1−ᾱ_{t−1})/(1−ᾱ_t))·sqrt(1−ᾱ_t/ᾱ_{t−1}), with step noise shared
-between paired branches to keep common random numbers). Results are in `docs/RESULTS_SUMMARY.md`, generated from `results/`.
+configs/presets/cpu.yaml). The **main reported run** used preset `v2` (configs/presets/v2.yaml):
+135 locations (68 train / 12 val from the earlier runs; 55 fresh test locations never used before), 5000 training
+steps, 3 seeds, 8 ensemble members; λ scale 3 (selected on validation in the earlier sweep from {0.3, 1, 3}); rate
+projection off; guidance scale chosen on validation by a pre-registered rule from {0, 0.003, 0.01, 0.03, 0.1, 0.3}
+(→ 0); post-hoc spread factor per seed and model fitted on validation (skill/spread); deterministic DDIM (an earlier
+validation sweep of η ∈ {0, 0.5, 1} chose 0; stochastic DDIM: σ_t = η·sqrt((1−ᾱ_{t−1})/(1−ᾱ_t))·sqrt(1−ᾱ_t/ᾱ_{t−1}),
+with step noise shared between paired branches to keep common random numbers). Results are in `docs/RESULTS_SUMMARY.md`, generated from `results/`.
 
 ## 1 Data
 

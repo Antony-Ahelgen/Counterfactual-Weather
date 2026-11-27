@@ -1,0 +1,11 @@
+{
+  "result_file": "proxy_backtest.csv",
+  "command": "python.exe scripts/validate.py --preset medium_tuned",
+  "git_commit": "a19d971e59c0bbdcf498c40955d15534fbe80937",
+  "seed": null,
+  "config": null,
+  "timestamp": "2026-11-26T20:04:29",
+  "python": "3.14.2",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "part": "1a"
+}

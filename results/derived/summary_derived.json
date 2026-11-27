@@ -1,9 +1,9 @@
 {
- "sharpness_closeness_diff_phys_G_P": 1.0310105209988163,
- "sharpness_closeness_det": 0.7158530849936433,
- "sharpness_closeness_diff_plain": 0.9482101957282649,
- "anom_ratio_diff_phys_G_P": 1.3196073793947702,
- "anom_ratio_diff_phys": 1.3136770591420432,
- "anom_ratio_diff_plain": 1.0336240784874093,
- "anom_ratio_det": 0.6767292805681123
+ "sharpness_closeness_diff_phys_G_P": 0.6110950542364901,
+ "sharpness_closeness_det": 0.7005326121799289,
+ "sharpness_closeness_diff_plain": 0.45561771416365615,
+ "anom_ratio_diff_phys_G_P": 1.7599855766305308,
+ "anom_ratio_diff_phys": 1.762593179945491,
+ "anom_ratio_diff_plain": 1.4273786580467975,
+ "anom_ratio_det": 0.9880449713021561
 }

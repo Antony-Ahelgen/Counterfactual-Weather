@@ -39,7 +39,16 @@ def main() -> None:
             key = f"{prefix}@{a}@{b}" if b is not None else f"{prefix}@{a}"
             lines.append(r"\expandafter\def\csname " + key + r"\endcsname{" + s + "}")
 
-    m = pd.read_csv(RES / "test" / "metrics.csv")
+    m_all = pd.read_csv(RES / "test" / "metrics.csv")
+    seeds = sorted(int(x) for x in m_all.seed.unique()) if "seed" in m_all else [0]
+    put("d", "nseeds", None, len(seeds), 0)
+    if "seed" in m_all:   # per-seed values: \R{variant}{<metric>s<seed>}
+        for _, r in m_all.iterrows():
+            for k in ["mae", "crps", "grad_ratio", "hf_ratio", "phen_frac", "mono_frac", "cov90", "spread_skill"]:
+                if k in r:
+                    put("r", r.variant.replace("+", "_"), f"{k}s{int(r.seed)}", r[k],
+                        2 if k.endswith("ratio") or k == "spread_skill" else 3)
+    m = m_all[m_all.seed == 0] if "seed" in m_all else m_all   # main macros = seed 0 (as the tables)
     for _, r in m.iterrows():
         v = r.variant.replace("+", "_")
         for k in ["mae", "rmse", "crps", "ssim", "grad_ratio", "hf_ratio", "rate_frac", "phen_frac", "mono_frac",
@@ -50,12 +59,14 @@ def main() -> None:
             put("r", v, "members", r["members"], 0)
     ci = RES / "test" / "metrics_ci.csv"
     if ci.exists():
-        for _, r in pd.read_csv(ci).iterrows():
+        ci_ = pd.read_csv(ci)
+        for _, r in (ci_[ci_.seed == 0] if "seed" in ci_ else ci_).iterrows():
             put("r", r.variant, f"{r.metric}lo", r.lo95)
             put("r", r.variant, f"{r.metric}hi", r.hi95)
     pt = RES / "test" / "paired_tests.csv"
     if pt.exists():
-        for _, r in pd.read_csv(pt).iterrows():
+        pt_ = pd.read_csv(pt)
+        for _, r in (pt_[pt_.seed == 0] if "seed" in pt_ else pt_).iterrows():
             put("r", f"diff{r.other}", r.metric, r["diff"], 4)
             put("r", f"diff{r.other}", f"{r.metric}lo", r.lo, 4)
             put("r", f"diff{r.other}", f"{r.metric}hi", r.hi, 4)
@@ -92,6 +103,11 @@ def main() -> None:
     gc = RES / "val" / "guidance_choice.json"
     if gc.exists():
         lines.append(r"\expandafter\def\csname d@gamma\endcsname{" + f"{json.loads(gc.read_text())['guidance_scale']:g}" + "}")
+    spf = RES / "val" / "spread_choice.json"
+    if spf.exists():
+        fs = [v for d in json.loads(spf.read_text()).values() for v in d.values()]
+        put("d", "spreadmin", None, min(fs), 2)
+        put("d", "spreadmax", None, max(fs), 2)
     demo = RES / "counterfactual" / "demo.json"
     if demo.exists():
         dj = json.loads(demo.read_text())

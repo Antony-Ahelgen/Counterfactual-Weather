@@ -7,7 +7,7 @@
 - The natural experiment relies on matching on observed covariates; unobserved differences between treated and control locations remain.
 
 ## Data
-- **Weather is coarse.** ERA5-Land is ~9 km and ERA5 (used for precipitation, radiation, ET0 via Open-Meteo `era5_seamless`) is ~25–31 km, while imagery is 20 m. Every pixel in a 640 m patch shares one weather sequence; within-patch variation must come from context imagery and static layers. The design uses 160 locations ≥0.3° apart (distinct weather cells; the main reported run uses 80 of them) to give the model real weather variation, but the weather–vegetation relationship is learned from few weather series (56 training locations in the main run).
+- **Weather is coarse.** ERA5-Land is ~9 km and ERA5 (used for precipitation, radiation, ET0 via Open-Meteo `era5_seamless`) is ~25–31 km, while imagery is 20 m. Every pixel in a 640 m patch shares one weather sequence; within-patch variation must come from context imagery and static layers. The design uses 160 locations ≥0.3° apart (distinct weather cells; the main reported run uses 135 of them) to give the model real weather variation, but the weather–vegetation relationship is learned from few weather series (68 training locations in the main run).
 - **Precipitation and radiation come from ERA5 (0.25°), not ERA5-Land**, because Open-Meteo's `era5_land` daily product returns null for them. The CDS route would give native ERA5-Land values (needs a user key). <!--noaudit-->
 - **Stress index is SPEI-like, not SPEI.** It combines standardised 30-day anomalies of P−ET0, temperature, VPD and soil moisture against a per-location, per-day-of-year climatology from 2010–2019 + 2023 (val/test years excluded). Eleven reference years is a short climatology; extremes are less well estimated.
 - **Cloud masking uses the Sentinel-2 SCL layer only** (classes 4, 5, 6 kept). SCL misses some thin cloud, haze and shadow; this shows up as implausibly fast NDVI rises between composites and inflates the data-derived rate bounds (see results/data/data_summary.json).
@@ -18,8 +18,9 @@
 
 ## Model and compute
 - **CPU only** (no CUDA GPU): 32×32 px patches (640 m), 8 context + 8 target 5-day frames, ~0.9 M-parameter U-Net,
-  3000 training steps (main run), **1 seed**, 8 ensemble members. Single-seed results do not capture training
-  variance; differences of a few thousandths between diffusion variants may be within seed-to-seed variance.
+  5000 training steps (main run), **3 seeds**, 8 ensemble members. Three seeds give only a rough view of training
+  variance; claims are counted as supported only if supported in every seed (seed-robustness table in
+  docs/RESULTS_SUMMARY.md).
 - Monotonicity is trained AND scored with the same hand-designed stress perturbation of the weather (fixed direction
   in feature space), so the monotone-violation metric is in-sample for the physics models.
 - Rate bounds are the 99.5th percentile of clean consecutive differences (both frames ≥95 % valid) per land-cover
@@ -27,30 +28,34 @@
   nominal 0.5 % (see the `observed` row in results/test/metrics.csv) because observed series include less clean
   frames and bounds are pooled per land-cover group.
 - Physics guidance enforces the same envelope and rate bounds that the violation metrics score, so zero violations
-  under guidance/projection hold by construction; violation rates below the observations' own indicate
-  over-constraint, not added realism.
+  under guidance/rate projection would hold by construction. In the main run guidance is off (γ = 0 selected on
+  validation) and rate projection is disabled, so violations come from the learned losses only; they are below the
+  observations' own envelope and rate violation rates, which may partly reflect smoother forecasts.
 
 ## Runs actually reported
-- **Main (reported) run: preset `medium_tuned`** — the 80 of 160 locations whose Sentinel-2 download had completed by a
-  fixed cut-off (owner time limit), re-split 56/12/12 with the same rule and seed **before any training**
-  (`manifests/locations_medium.csv`); 3000 training steps; physics-loss weight scale λ selected on validation from
-  {0.3, 1, 3} (chose 3); guidance scale γ selected on validation from {0, 0.01, 0.1} (chose 0.1, the grid edge, so
-  the optimum is not identified); DDIM stochasticity η selected on validation from {0, 0.5, 1} to improve calibration
-  (chose 0: stochastic sampling made validation coverage worse). The test split was evaluated once with these choices.
-- **Reference runs (kept, not tuned on test):** `results/medium/` (same data, λ = 1, untuned) and
-  `results/archive_fast69/` (69 locations, 2500 steps). Their conclusions agree in direction with the main run; the
-  per-run numbers are in each folder's `RESULTS_SUMMARY.md`.
+- **Main (reported) run: preset `v2`** — development set = the 80 locations of the earlier runs (68 train / 12 val);
+  fresh test set = locations never downloaded before. Of 80 planned fresh test locations, the **55** whose downloads
+  had completed by the owner's deadline (2026-11-27 15:45 IST) were used; this was decided before any v2 test result
+  was seen, and the remaining 25 are reserved for later checks (`manifests/locations_v2.csv`). 5000 training steps,
+  3 seeds; physics-loss weights ×3 (selected on validation in the earlier λ sweep); rate projection off; guidance
+  scale chosen on validation by a pre-registered rule (envelope-violation rate closest to the observations' among
+  γ within 2 % of the unguided CRPS) → γ = 0; post-hoc spread factors (1.10–1.22) fitted on validation per seed and
+  model; deterministic DDIM. The test split was evaluated once with these choices.
+- **Reference runs (kept, not tuned on test):** `results/archive_medium_tuned/` (80 locations, 56/12/12, λ×3,
+  γ = 0.1, 1 seed), `results/medium/` (same data, untuned) and `results/archive_fast69/` (69 locations). Their
+  conclusions agree in direction with the main run; the per-run numbers are in each folder's `RESULTS_SUMMARY.md`.
 - Per-constraint retraining ablations were not run; physics ablations switch guidance/projection at sampling time.
-- Evaluation: 120 test windows and 8 ensemble members per probabilistic variant; effects on 100 windows. With 12 test
-  locations and few drought-labelled windows, bootstrap intervals are wide and **no conclusion about drought effects
-  is solid** (counts in docs/RESULTS_SUMMARY.md, "Statistical caveats").
+- Evaluation: 200 test windows per seed and 8 ensemble members per probabilistic variant; effects on 200 windows
+  (seed 0), of which only 23 are drought-labelled at 16 locations. Bootstrap intervals over 55 location clusters may
+  be too narrow, and **no conclusion about drought effects is solid** (counts in docs/RESULTS_SUMMARY.md,
+  "Statistical caveats").
 - The full-scale pipeline (`scripts/run_pipeline.py`, preset `cpu`, all 160 locations) is implemented and
   smoke-tested but was not run to completion.
 
 ## Drought-effect bias
 - The drought-effect estimates are compared with the observed drought anomaly in docs/RESULTS_SUMMARY.md (table
   "Drought-effect estimates", generated per run). Models whose anomaly is far from the observed one are biased; the
-  direction and size differ between runs (fast vs. medium), which itself shows the estimates are not stable at this
+  size differs between runs (physics models: 2.7× fast, about 1.3× medium/medium_tuned, 1.8× v2), which itself shows the estimates are not stable at this
   sample size.
 
 ## Scope changes (honest record)
