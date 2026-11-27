@@ -61,7 +61,7 @@ Not needed: the pipeline uses Open-Meteo era5_seamless (key-free).
 ## Next  (RESUME HERE)
 1. Downloads for a possible v3 run in the background (resumable):
    `.venv\Scripts\python scripts\download_data.py --stage s2 --workers 5 --threads 3 >> runs\download\s2_v2test.log 2>&1`
-   then `.venv\Scripts\python scriptsetch_extra.py >> runs\download\extra.log 2>&1`.
+   then `.venv\Scripts\python scripts\fetch_extra.py >> runs\download\extra.log 2>&1`.
 2. v3 (if wanted): train on the 135 v2 locations; FRESH test = the 25 reserved v2 test locations + the X... extra
    locations; design fixed before any v3 result. A GPU would help the sharpness claim most.
 3. Authors: verify refs.bib, port paper to the Springer LNEE template, add related work on causal attribution.
