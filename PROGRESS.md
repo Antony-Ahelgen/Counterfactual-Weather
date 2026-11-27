@@ -58,7 +58,7 @@ Not needed: the pipeline uses Open-Meteo era5_seamless (key-free).
    downloads skip finished locations). In PowerShell:
    ```
    cd C:\Users\senth\cfveg-project\counterfactual-vegetation-diffusion
-   .venvScriptspython scriptsinish_v2.py > runsinish_v2_stdout.log 2>&1   (NOT run_v2.py: it would restart the download)
+   .venv\Scripts\python scripts\finish_v2.py > runs\finish_v2_stdout.log 2>&1   (NOT run_v2.py: it would restart the download)
    ```
    Progress: runs/pipeline.log ("v2:" lines), runs/download/s2_v2test.log, runs/v2/<model>_s<seed>/train.log.
 2. When "V2 PIPELINE DONE": review results/v2/RESULTS_SUMMARY.md (seed-robustness table), independent review,

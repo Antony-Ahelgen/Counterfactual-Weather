@@ -1,7 +1,7 @@
 {
   "result_file": "drought_sensitivity.csv",
   "command": "python.exe scripts/build_data.py --preset v2",
-  "git_commit": "1646c5b4ab31f744ca63acc27efa1c3d9bfac396",
+  "git_commit": "6da67eefa35c0e4110847b76d37edafd065cb3c0",
   "seed": null,
   "config": {
     "stress_window_days": 30,
@@ -16,7 +16,7 @@
       "soil_moisture": 1.0
     }
   },
-  "timestamp": "2026-11-26T20:34:49",
+  "timestamp": "2026-11-27T15:47:32",
   "python": "3.14.2",
   "platform": "Windows-11-10.0.26200-SP0"
 }
