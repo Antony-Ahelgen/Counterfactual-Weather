@@ -44,6 +44,11 @@ Not needed: the pipeline uses Open-Meteo era5_seamless (key-free).
   locations (manifests/locations_v2.csv); 5000 steps x 3 seeds; lambda x3; no rate projection; gamma matched to the
   observed envelope-violation rate on validation; post-hoc spread calibration on validation; test evaluated once.
 
+- 2026-11-27 15:27 v2: all 9 models trained (3 variants x 3 seeds, 5000 steps). Validation selections (pre-registered rules):
+  gamma = 0 (diff_phys+P already violates the envelope less than the observations, 1.5 % vs 3.6 % on val; guidance
+  only lowers it further); spread factors 1.10-1.22 (ensembles under-dispersed on val). Waiting for the fresh
+  test-set download (134/160 at 15:44; 26 test locations left), then cube rebuild and the single test evaluation.
+
 ## Next  (RESUME HERE)
 1. Resume the v2 round (everything resumable: finished stages skipped, training resumes from checkpoints,
    downloads skip finished locations). In PowerShell:
