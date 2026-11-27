@@ -58,12 +58,15 @@ class Ctx:
         self.K, self.H = self.cfg["window"]["context"], self.cfg["window"]["horizon"]
         self.wx_mean = torch.tensor(self.stats["wx_mean"])
         self.wx_std = torch.tensor(self.stats["wx_std"])
-        self.runs = ROOT / "runs" / (preset + ("_smoke" if smoke else ""))
+        # checkpoints: runs/<preset>, or runs/<train.runs_preset> when a preset re-evaluates another preset's models
+        self.runs = ROOT / "runs" / (self.cfg["train"].get("runs_preset", preset) + ("_smoke" if smoke else ""))
         g_f = RESULTS / ("smoke/" if smoke else "") / "val" / "guidance_choice.json"
         if g_f.exists():   # guidance scale selected on VALIDATION (run_pipeline stage 5)
             self.cfg["physics"]["guidance_scale"] = json.loads(g_f.read_text())["guidance_scale"]
         s_f = g_f.with_name("spread_choice.json")   # post-hoc spread factors fitted on VALIDATION
         self.spread = json.loads(s_f.read_text()) if s_f.exists() else {}
+        c_f = g_f.with_name("calib_choice.json")    # bias + coverage-targeted width fitted on VALIDATION
+        self.calib = json.loads(c_f.read_text()) if c_f.exists() else {}
         e_f = g_f.with_name("eta_choice.json")
         self.cfg["diffusion"]["eta"] = json.loads(e_f.read_text())["eta"] if e_f.exists() else 0.0
 
@@ -93,6 +96,7 @@ class Ctx:
             return deterministic_variant(self.model("det", "deterministic"))
         parts = spec.split("+")
         run, guidance, projection, scale, eta = parts[0], False, False, None, None
+        use_cal = "Cal" in parts[1:]
         for p in parts[1:]:
             if p.startswith("Ex"):
                 eta = float(p[2:])
@@ -102,9 +106,12 @@ class Ctx:
                     scale = float(p[2:])
             elif p == "P":
                 projection = True
-        key = spec.split("+Ex")[0].replace("+", "_")
+        key = spec.split("+Ex")[0].replace("+Cal", "").replace("+", "_")
         sp = self.spread.get(f"s{self.seed}", {}).get(key, 1.0) if not getattr(self, "no_spread", False) else 1.0
-        v = diffusion_variant(self.sampler(run, guidance, projection, scale, eta), spec, spread=sp)
+        cal = None
+        if use_cal:
+            cal = self.calib[f"s{self.seed}"][key]     # KeyError = not fitted on validation -> refuse
+        v = diffusion_variant(self.sampler(run, guidance, projection, scale, eta), spec, spread=sp, calib=cal)
         return v
 
 

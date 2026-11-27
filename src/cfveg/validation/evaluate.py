@@ -55,7 +55,16 @@ def spread_scale(ens: torch.Tensor, factor: float) -> torch.Tensor:
     return mu + factor * (ens - mu)
 
 
-def diffusion_variant(sampler, name: str, spread: float = 1.0) -> Variant:
+def calibrate(ens: torch.Tensor, k: float, bias) -> torch.Tensor:
+    """Post-hoc calibration fitted on VALIDATION (scripts/fit_calibration.py): subtract the mean bias of the ensemble
+    mean per lead time (bias [H], NDVI) and scale deviations from the ensemble mean by k (chosen so that validation
+    90 % interval coverage reaches 0.90). ens [M, B, H, P, P] in NDVI."""
+    mu = ens.mean(0, keepdim=True)
+    b = torch.as_tensor(bias, dtype=ens.dtype).view(1, 1, -1, 1, 1)
+    return ((mu - b) + k * (ens - mu)).clamp(-1.0, 1.0)
+
+
+def diffusion_variant(sampler, name: str, spread: float = 1.0, calib: dict | None = None) -> Variant:
     def f(b, m, s):
         B = b["tgt"].shape[0]
         g = torch.Generator().manual_seed(s)
@@ -63,7 +72,10 @@ def diffusion_variant(sampler, name: str, spread: float = 1.0) -> Variant:
         big = {k: v.repeat(m, *([1] * (v.ndim - 1))) for k, v in b.items()}
         keys = torch.arange(m * B)                     # same seed + same keys -> CRN in the monotone test
         x = sampler.sample(big, noise.view(m * B, *b["tgt"].shape[1:]), z_keys=keys, z_seed=s)
-        return spread_scale(scaled_to_ndvi(x).view(m, B, *b["tgt"].shape[1:]), spread)
+        ens = scaled_to_ndvi(x).view(m, B, *b["tgt"].shape[1:])
+        if calib is not None:
+            return calibrate(ens, calib["k"], calib["bias"])
+        return spread_scale(ens, spread)
     return Variant(name, f, True, True)
 
 
