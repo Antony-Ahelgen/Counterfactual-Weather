@@ -1,0 +1,14 @@
+{
+ "guidance_scale": 0.0,
+ "observed_envelope_violation": 0.03595688740601793,
+ "rule": "envelope violation closest to observed among gamma with val CRPS within 2% of gamma=0",
+ "candidates": [
+  0.0,
+  0.003,
+  0.01,
+  0.03,
+  0.1,
+  0.3
+ ],
+ "preset": "v2"
+}

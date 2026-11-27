@@ -72,6 +72,8 @@ def main() -> None:
     m = m[m.seed == a.seed].copy()
     m["key"] = m.variant.map(safe)
     ci = pd.read_csv(base / "test" / "metrics_ci.csv") if (base / "test" / "metrics_ci.csv").exists() else None
+    if ci is not None and "seed" in ci:
+        ci = ci[ci.seed == a.seed]
     if ci is not None:
         for metric in ["mae", "crps"]:
             c = ci[ci.metric == metric].set_index("variant")

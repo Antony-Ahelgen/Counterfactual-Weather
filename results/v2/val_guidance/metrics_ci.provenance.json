@@ -1,0 +1,12 @@
+{
+  "result_file": "metrics_ci.csv",
+  "command": "python.exe scripts/eval_all.py --preset v2 --split val --tag val_guidance --members 8 --n_windows 60 --no_spread --reference diff_phys+P --variants observed diff_phys+P diff_phys+Gx0.003+P diff_phys+Gx0.01+P diff_phys+Gx0.03+P diff_phys+Gx0.1+P diff_phys+Gx0.3+P",
+  "git_commit": "1a2f4ef434b40e15917271a24111ae15976dc3b8",
+  "seed": 0,
+  "config": null,
+  "timestamp": "2026-11-27T14:46:17",
+  "python": "3.14.2",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "split": "val",
+  "bootstrap": "1000 x locations"
+}

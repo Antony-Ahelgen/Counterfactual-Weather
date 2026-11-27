@@ -1,0 +1,11 @@
+{
+  "result_file": "summary_derived.json",
+  "command": "python.exe scripts/render_summary.py --seed 0",
+  "git_commit": "3a3ab9a5b6f62453e8130a961f38d04cfdafb061-dirty",
+  "seed": null,
+  "config": null,
+  "timestamp": "2026-11-27T17:33:45",
+  "python": "3.14.2",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "note": "numbers derived by scripts/render_summary.py from results/"
+}

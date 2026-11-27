@@ -60,7 +60,10 @@ def main() -> None:
     if a.smoke:
         L += ["**SMOKE RUN ON THE TEST FIXTURE — NOT A FINDING.**", ""]
     m = pd.read_csv(base / "test" / "metrics.csv")
+    SEEDS_RUN = sorted(int(x) for x in m.seed.unique())
     m = m[m.seed == SEED].set_index("variant")
+    prov0 = base / "test" / "metrics.provenance.json"
+    cfg_run = json.loads(prov0.read_text()).get("config", {}) if prov0.exists() else {}
     data = json.loads((base / "data" / "data_summary.json").read_text()) if (base / "data" / "data_summary.json").exists() else {}
     choice = {}
     for k in ["lambda_choice", "guidance_choice"]:
@@ -76,18 +79,27 @@ def main() -> None:
     if choice:
         lam = choice.get("lambda_choice", {}).get("lambda_scale")
         gch = choice.get("guidance_choice", {})
+        ph = cfg_run.get("physics", {})
         lam_txt = (f"lambda scale {lam} (selected on validation)" if lam is not None else
-                   "physics-loss weights NOT tuned (no lambda sweep was run; config defaults lambda_rate=1, "
-                   "lambda_phen=0.5, lambda_mono=1)")
+                   f"physics-loss weights from the preset config: lambda_rate={ph.get('lambda_rate')}, "
+                   f"lambda_phen={ph.get('lambda_phen')}, lambda_mono={ph.get('lambda_mono')}"
+                   if ph else "physics-loss weights NOT tuned (no lambda sweep was run)")
         g = gch.get("guidance_scale")
         edge = (" - the largest value of the grid, so the optimum was not identified"
-                if g is not None and g == max(gch.get("candidates", [g])) else "")
+                if g is not None and g > 0 and g == max(gch.get("candidates", [g])) else
+                " - the smallest value, so guidance is off at sampling time" if g == 0 else "")
         eta_f = base / "val" / "eta_choice.json"
         eta_txt = ""
         if eta_f.exists():
             ec = json.loads(eta_f.read_text())
             eta_txt = (f"; DDIM eta {ec['eta']} selected on validation from {ec['candidates']} "
                        f"(calibration fix{' did not help: stochastic sampling lowered validation coverage' if ec['eta'] == 0 else ''})")
+        spf = base / "val" / "spread_choice.json"
+        if spf.exists():
+            spc = json.loads(spf.read_text())
+            fs = [v for d in spc.values() for v in d.values()]
+            eta_txt += (f"; post-hoc ensemble spread factors {min(fs):.2f}-{max(fs):.2f} fitted per seed and "
+                        f"variant on validation (skill/spread)")
         L.append(f"- {lam_txt}; guidance scale {g} selected on validation from {gch.get('candidates')}{edge}{eta_txt}. "
                  f"Source: results/val/*.json")
     prov = base / "test" / "metrics.provenance.json"
@@ -95,7 +107,9 @@ def main() -> None:
     pw = sorted((base / "test").glob("per_window_*_s0.csv"))
     n_eval = len(pd.read_csv(pw[0])) if pw else 0
     n_eval_d = int(pd.read_csv(pw[0]).drought.sum()) if pw else 0
-    L.append(f"- Preset **{preset}**, 1 seed (seed 0, no training-variance estimate); test evaluation on {n_eval} "
+    seed_txt = (f"{len(SEEDS_RUN)} training seeds {SEEDS_RUN}; tables below show seed {SEED}, per-seed verdicts in "
+                f"the seed-robustness table" if len(SEEDS_RUN) > 1 else "1 seed (seed 0, no training-variance estimate)")
+    L.append(f"- Preset **{preset}**, {seed_txt}; test evaluation on {n_eval} "
              f"windows ({n_eval_d} drought-labelled); ensemble members per row in results/test/metrics.csv.")
     L += ["", "## Main comparison (test split)", "",
           "| Variant | MAE | CRPS | SSIM | grad ratio | HF ratio | rate viol. | env. viol. | mono viol. |",
@@ -172,6 +186,7 @@ def main() -> None:
                          + " (negative = proposed better)"
                          + ("; MAE: " + "; ".join(f"vs {r.other}: {f(r['diff'], 4)} [{f(r.lo, 4)}, {f(r.hi, 4)}]"
                                                   for _, r in pd.read_csv(pt).query("metric == 'mae'").iterrows()
+                                                  if ("seed" not in r or r.seed == SEED)
                                                   if r.other in ["det", "climatology", "diff_plain", "persistence"]))
                          + ". CRPS of a single deterministic forecast equals its MAE, so CRPS gains over point "
                            "baselines partly reflect being an ensemble; physics constraints cost accuracy relative "
@@ -279,7 +294,8 @@ def main() -> None:
               "|---|" + "---|" * (len(per) + 1)]
         for c, _, _ in verdicts:
             vs = [per[k].get(c, "n/a") for k in per]
-            comb = ("supported" if all(v == "supported" for v in vs) else
+            short = {v.split(" (")[0] for v in vs}
+            comb = (short.pop() if len(short) == 1 else "supported" if all(v == "supported" for v in vs) else
                     "not supported" if all(v.startswith("not supported") for v in vs) else "mixed across seeds")
             L.append(f"| {c} | " + " | ".join(v.split(" (")[0] for v in vs) + f" | **{comb}** |")
         L.append("")
@@ -304,10 +320,14 @@ def main() -> None:
         gch = json.loads(gcf.read_text())
         gm = pd.read_csv(vg)
         cav.append(f"- Guidance scale {gch['guidance_scale']} was selected on validation from {gch['candidates']}; "
-                   f"it is the largest candidate (optimum not identified). On test, guidance changes 90 % coverage "
+                   + ("it is the largest candidate (optimum not identified). " if gch['guidance_scale'] > 0 and
+                      gch['guidance_scale'] == max(gch['candidates']) else
+                      "guidance is therefore off at sampling time. " if gch['guidance_scale'] == 0 else "")
+                   + f"On test, guidance changes 90 % coverage "
                    f"from {f(m.loc['diff_phys+P', 'cov90']) if 'diff_phys+P' in m.index else 'n/a'} (projection only) to "
                    f"{f(m.loc[P, 'cov90'])}.")
-    cav.append("- Single training seed: differences of a few thousandths between diffusion variants may be within "
+    if len(SEEDS_RUN) == 1:
+        cav.append("- Single training seed: differences of a few thousandths between diffusion variants may be within "
                "seed-to-seed variance.")
     cav.append("- **No conclusion about drought effects is solid yet**: the drought-labelled test sample is far too "
                "small (counts above).")

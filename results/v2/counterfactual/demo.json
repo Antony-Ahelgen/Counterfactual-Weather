@@ -1,0 +1,23 @@
+{
+ "variant": "diff_phys+G+P",
+ "members": 8,
+ "loc_id": "L0113",
+ "year": 2022,
+ "t0_bin": 22,
+ "quadrant": [
+  0,
+  32
+ ],
+ "normal_method": "analog",
+ "n_normal_analogs": 2,
+ "drought_method": "observed",
+ "horizon_stress_drought": 3.455822706222534,
+ "horizon_stress_normal_mean": -0.13784727454185486,
+ "area_mean_delta_crn": -0.25415438413619995,
+ "frac_sig_loss_crn": 1.0,
+ "member_area_delta_sd_crn": 0.050365157425403595,
+ "member_area_delta_sd_independent": 0.07135108858346939,
+ "pixel_delta_var_crn": 0.008393415249884129,
+ "pixel_delta_var_independent": 0.03294453024864197,
+ "crn_variance_ratio_pixel": 0.2547741669568993
+}
