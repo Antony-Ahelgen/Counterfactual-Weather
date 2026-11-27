@@ -49,6 +49,10 @@ Not needed: the pipeline uses Open-Meteo era5_seamless (key-free).
   only lowers it further); spread factors 1.10-1.22 (ensembles under-dispersed on val). Waiting for the fresh
   test-set download (134/160 at 15:44; 26 test locations left), then cube rebuild and the single test evaluation.
 
+- 2026-11-27 15:50 Owner deadline 19:00 IST -> owner chose to test on the 54 fresh test locations already downloaded
+  (decided before any v2 test result). Download stopped; the 26 remaining test locations are left out of v2 (logged as
+  "missing s2" in the cube meta). Finishing with `scripts/finish_v2.py` (log runs/finish_v2_stdout.log, runs/pipeline.log).
+
 ## Next  (RESUME HERE)
 1. Resume the v2 round (everything resumable: finished stages skipped, training resumes from checkpoints,
    downloads skip finished locations). In PowerShell:
