@@ -1,233 +1,14 @@
 {
  "smoke_fixture": false,
- "n_locations": 80,
+ "n_locations": 135,
  "split_counts": {
   "train": 68,
+  "test": 55,
   "val": 12
  },
  "dropped_locations": [
   [
-   "L0021",
-   "missing s2"
-  ],
-  [
-   "L0087",
-   "missing s2"
-  ],
-  [
-   "L0089",
-   "missing s2"
-  ],
-  [
-   "L0092",
-   "missing s2"
-  ],
-  [
-   "L0093",
-   "missing s2"
-  ],
-  [
-   "L0094",
-   "missing s2"
-  ],
-  [
-   "L0095",
-   "missing s2"
-  ],
-  [
-   "L0096",
-   "missing s2"
-  ],
-  [
-   "L0097",
-   "missing s2"
-  ],
-  [
-   "L0098",
-   "missing s2"
-  ],
-  [
-   "L0099",
-   "missing s2"
-  ],
-  [
-   "L0100",
-   "missing s2"
-  ],
-  [
-   "L0101",
-   "missing s2"
-  ],
-  [
-   "L0102",
-   "missing s2"
-  ],
-  [
-   "L0103",
-   "missing s2"
-  ],
-  [
-   "L0104",
-   "missing s2"
-  ],
-  [
-   "L0105",
-   "missing s2"
-  ],
-  [
-   "L0106",
-   "missing s2"
-  ],
-  [
-   "L0107",
-   "missing s2"
-  ],
-  [
-   "L0108",
-   "missing s2"
-  ],
-  [
-   "L0109",
-   "missing s2"
-  ],
-  [
-   "L0110",
-   "missing s2"
-  ],
-  [
-   "L0111",
-   "missing s2"
-  ],
-  [
-   "L0112",
-   "missing s2"
-  ],
-  [
-   "L0113",
-   "missing s2"
-  ],
-  [
-   "L0114",
-   "missing s2"
-  ],
-  [
-   "L0116",
-   "missing s2"
-  ],
-  [
-   "L0117",
-   "missing s2"
-  ],
-  [
-   "L0118",
-   "missing s2"
-  ],
-  [
-   "L0119",
-   "missing s2"
-  ],
-  [
-   "L0120",
-   "missing s2"
-  ],
-  [
-   "L0121",
-   "missing s2"
-  ],
-  [
-   "L0122",
-   "missing s2"
-  ],
-  [
-   "L0123",
-   "missing s2"
-  ],
-  [
-   "L0124",
-   "missing s2"
-  ],
-  [
-   "L0125",
-   "missing s2"
-  ],
-  [
-   "L0126",
-   "missing s2"
-  ],
-  [
-   "L0127",
-   "missing s2"
-  ],
-  [
-   "L0128",
-   "missing s2"
-  ],
-  [
-   "L0129",
-   "missing s2"
-  ],
-  [
-   "L0130",
-   "missing s2"
-  ],
-  [
-   "L0131",
-   "missing s2"
-  ],
-  [
-   "L0133",
-   "missing s2"
-  ],
-  [
-   "L0134",
-   "missing s2"
-  ],
-  [
-   "L0135",
-   "missing s2"
-  ],
-  [
-   "L0136",
-   "missing s2"
-  ],
-  [
-   "L0137",
-   "missing s2"
-  ],
-  [
-   "L0138",
-   "missing s2"
-  ],
-  [
-   "L0140",
-   "missing s2"
-  ],
-  [
    "L0141",
-   "missing s2"
-  ],
-  [
-   "L0142",
-   "missing s2"
-  ],
-  [
-   "L0143",
-   "missing s2"
-  ],
-  [
-   "L0144",
-   "missing s2"
-  ],
-  [
-   "L0145",
-   "missing s2"
-  ],
-  [
-   "L0147",
-   "missing s2"
-  ],
-  [
-   "L0148",
    "missing s2"
   ],
   [
@@ -327,15 +108,15 @@
    "missing s2"
   ]
  ],
- "valid_pixel_frac": 0.5012578758484421,
+ "valid_pixel_frac": 0.49949467293117644,
  "valid_frac_by_year": {
-  "2017": 0.36013059032206635,
-  "2018": 0.5678918332469707,
-  "2019": 0.5332235530931122,
-  "2020": 0.5539320965202488,
-  "2021": 0.4887619329958546,
-  "2022": 0.5454383694395727,
-  "2023": 0.45942675532126914
+  "2017": 0.3622467433153817,
+  "2018": 0.569059909119898,
+  "2019": 0.5291265117157974,
+  "2020": 0.5504827082742819,
+  "2021": 0.48495968265778533,
+  "2022": 0.5393330292186319,
+  "2023": 0.4612541262164588
  },
  "rate_bounds_inc_per_day": [
   0.06328125298023224,
@@ -358,7 +139,7 @@
   "drought_frac": 0.08648648648648649
  },
  "windows_test": {
-  "n_windows": 0,
-  "drought_frac": NaN
+  "n_windows": 1487,
+  "drought_frac": 0.10490921318090114
  }
 }
